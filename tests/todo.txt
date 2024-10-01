@@ -1,0 +1,54 @@
+###Outline
+
+##CLI
+-check valid/invalid input by user
+-check output
+
+## board and pieces
+- board - 8*8 = 64
+- p1,p2 pieces in specific locations
+- add unicode to the pieces ( in todo file)
+- generate a game state
+    - cells that take part in the game
+    - empty/non empty and if non empty if it is p1 or p2
+    - possible( legal moves)
+## players
+-
+
+## rules
+- rules prompt to the user
+	- maybe read from file
+- have to eat
+- yes/no double eat
+- no going backwards
+
+## game logic
+
+## Game Play
+- indicate if it's player 1 or 2
+- game loop
+- you play vs AI
+- AI vs AI
+    - choose ai type
+    - choose speed of game?
+-possible moves
+    - illegal moves gives a prompt but does not exectue
+    - no more moves we get a draw? a win?
+
+### AI
+
+## general
+- start with logic > minmax > a*
+## MinMax
+
+## A*
+
+
+##Host
+- check out hosting this on replit for CLI based game
+
+##README
+-instructions for setting up the project locally
+-Add images, GIFs, demo video that shows gameplay in action.
+-command examples to run the game.
+

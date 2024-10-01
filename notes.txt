@@ -1,0 +1,7 @@
+in Israel, the checkers board setup typically follows the European convention, (a1) is dark. , including the Russian style of checkers, which is also quite popular in Israel.
+
+Therefore, for setting up a checkers game in Israel:
+
+The top-left cell (a1) is dark, and pieces are initially placed on the dark cells.
+a2, a4, a6, a8 (second row, even columns) would also be dark and used for gameplay.
+If you're targeting Israeli players, it’s best to use a setup where the top-left cell (a1) is dark.
