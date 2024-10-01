@@ -12,6 +12,13 @@
     - cells that take part in the game
     - empty/non empty and if non empty if it is p1 or p2
     - possible( legal moves)
+
+## game logic
+    - game logic class
+        possible moves and board interaction
+    - game state class
+        moves, turn etc
+
 ## players
 -
 
@@ -23,6 +30,9 @@
 - no going backwards
 
 ## game logic
+-keep game moves
+    - undo/redo
+    -display moves at game end
 
 ## Game Play
 - indicate if it's player 1 or 2
