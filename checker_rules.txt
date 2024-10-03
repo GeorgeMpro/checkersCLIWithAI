@@ -1,0 +1,16 @@
+
+# Board and Pieces:
+The game is played on an 8x8 board, with each player having 12 pieces. Only the dark squares are used, and players place their pieces in the first three rows on their respective sides.
+
+#Movement:
+A simple piece can move diagonally forward one square.
+Kings can move diagonally to any free square, both forward and backward.
+
+Capturing:
+Capturing is mandatory. If a simple piece can jump over an opponent's piece, it must do so.
+The capture continues as long as there are pieces to jump over.
+A piece that reaches the final line of the opponent's side is crowned as a king and can continue moving in the same sequence.
+
+#Winning:
+A player wins by capturing all the opponent’s pieces or leaving them without a legal move.
+The game can also end in a draw under specific conditions, such as repeated moves or if one side cannot force a win within a given number of moves.

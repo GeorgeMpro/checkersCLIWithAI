@@ -62,3 +62,9 @@
 -Add images, GIFs, demo video that shows gameplay in action.
 -command examples to run the game.
 
+
+##Optional
+- add a history file
+    - find a way to display or go over (json?)
+    1. local save history of moves for a file
+    2. use a server
