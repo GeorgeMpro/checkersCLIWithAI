@@ -1,20 +1,8 @@
 import pytest
-import board
 import piece
 from piece import Piece
 
 ROWS = COLUMNS = 8
-
-
-@pytest.fixture
-def board_setup():
-    return board.Board()
-
-
-@pytest.fixture
-def piece_setup(request):
-    # Default to 'p1' if no parameter is provided
-    return piece.Piece(request.param if hasattr(request, 'param') else 'p1')
 
 
 def put_piece_on_board(board_setup, cell_piece, row, column):
@@ -80,12 +68,13 @@ class TestCell:
         cell.remove_piece()
         assert cell.piece is None, "Expected cell to have a piece, but it does not."
 
+    # todo clean?
     def test_cell_can_display_on_board(self, board_setup, piece_setup):
         cell_empty = board_setup.get_cell(0, 1)
         cell_piece = piece_setup
         cell_p1 = put_piece_on_board(board_setup, cell_piece, 0, 0)
         cell_p2 = put_piece_on_board(board_setup, Piece("p2"), 1, 7)
-        assert cell_empty.display() == ""
+        assert cell_empty.display() == " ", "expected empty cell to display space"
         assert cell_p1.display() == "X", "expected p1 cell to display X"
         assert cell_p2.display() == "O", "expected p2 cell to display O"
 
