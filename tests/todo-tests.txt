@@ -1,0 +1,23 @@
+# def test_player_one_moves_to_higher_index(self):
+    # def test_player_one_piece_cannot_move_backwards(self):
+
+    # todo
+    ### test illegal moves
+    # cannot step on non-empty cell
+    # on existing piece
+    # on existing piece blocked from behind
+    # same player piece
+
+    # todo
+    ###test capture
+    # can capture
+    # can capture if free
+    # cannot capture if not free
+    # cannot capture same owner
+
+# 3. play order
+#   keeping track
+#   switching
+# 4. win lose draw conditions
+
+# optional: add a pieces array/dict?

@@ -17,6 +17,12 @@ def piece_placement_setup(board_setup, piece_setup, row=0, column=0):
     return cell, cell_piece
 
 
+@pytest.fixture
+def expected_game_start_display():
+    with open('tests/expected_initial_board_setup_display.txt', 'r') as file:
+        return file.read()
+
+
 class TestBoard:
     def test_has_valid_board(self, board_setup):
         actual_board_size = sum(len(row) for row in board_setup.get_board())

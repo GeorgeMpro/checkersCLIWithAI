@@ -1,6 +1,9 @@
 import pytest
 
-from conftest import board_setup
+from conftest import board_setup, piece_setup
+from exceptions.cell_not_found_error import CellNotFoundError
+from exceptions.illegal_move_error import IllegalMoveError
+from piece import Piece
 
 
 class TestBoardSetup:
@@ -27,36 +30,79 @@ class TestBoardSetup:
         print(f"\n{board_setup}")
 
 
+def setup_piece_on_cell_by_name_and_owner(board_setup, owner, source_name):
+    cell = board_setup.get_cell_by_name(source_name)
+    piece = Piece(owner)
+    cell.set_piece(piece)
+    return piece
+
+
 class TestMovingOnBoard:
-    def test_piece_can_move_on_board(self):
-        # put piece
-        # move piece
-        # asset new place
-        # assert piece is not on last place
-        pass
+    @pytest.mark.parametrize("source_name, target_name, owner",
+                             [("a11", "a22", "p1"), ("a13", "a22", "p1"), ("a13", "a24", "p1"),
+                              ("a82", "a71", "p2"), ("a82", "a73", "p2"), ("a88", "a77", "p2")]
+                             )
+    def test_piece_can_move_on_board(self, board_setup, piece_setup, source_name, target_name, owner):
+        piece = setup_piece_on_cell_by_name_and_owner(board_setup, owner, source_name)
+        assert board_setup.get_cell_by_name(source_name).piece == piece
 
-    # def test_player_one_moves_to_higher_index(self):
+        board_setup.move_piece(source_name, target_name)
+        assert board_setup.get_cell_by_name(target_name).piece == piece
+        assert board_setup.get_cell_by_name(source_name).piece is None
 
-    # def test_player_one_piece_cannot_move_backwards(self):
+    @pytest.mark.parametrize("source_name, target_name,owner",
+                             [("a22", "a11", "p1"), ("a22", "a13", "p1"), ("a24", "a13", "p1"),
+                              ("a71", "a82", "p2"), ("a73", "a82", "p2"), ("a77", "a88", "p2")]
+                             )
+    def test_player_cannot_move_backwards(self, board_setup, piece_setup, source_name, target_name, owner):
+        piece = setup_piece_on_cell_by_name_and_owner(board_setup, owner, source_name)
+        assert board_setup.get_cell_by_name(source_name).piece == piece
+
+        board_setup.move_piece(source_name, target_name)
+        assert board_setup.get_cell_by_name(target_name).piece is None
+        assert board_setup.get_cell_by_name(source_name).piece == piece
+
+    @pytest.mark.parametrize("source_name, target_name,owner",
+                             [("a11", "a1-1", "p1"), ("a11", "a199", "p1"), ("a11", "a182", "p1")]
+                             )
+    def test_piece_cannot_move_out_of_bounds(self, board_setup, piece_setup, source_name, target_name, owner):
+        setup_piece_on_cell_by_name_and_owner(board_setup, owner, source_name)
+
+        with pytest.raises(CellNotFoundError, match=f"Cell {target_name} not found"):
+            board_setup.move_piece(source_name, target_name)
+
+    @pytest.mark.parametrize("source_name, owner",
+                             [("a-111", "p1"), ("a00", "p1"), ("a-1-1", "p1"), ("b11", "p2"), ("a99", "p2"),
+                              ("a1", "p1")]
+                             )
+    def test_piece_cannot_setup_out_of_bounds(self, board_setup, piece_setup, source_name, owner):
+        with pytest.raises(CellNotFoundError, match=f"Cell {source_name} not found"):
+            setup_piece_on_cell_by_name_and_owner(board_setup, owner, source_name)
+
+    @pytest.mark.parametrize("source_name, target_name, owner",
+                             [("a11", "a11", "p1"), ("a22", "a22", "p1"), ("a24", "a24", "p1"),
+                              ("a82", "a82", "p2"), ("a73", "a73", "p2"), ("a88", "a88", "p2")]
+                             )
+    def test_cannot_move_on_itself(self, board_setup, piece_setup, source_name, target_name, owner):
+        piece = setup_piece_on_cell_by_name_and_owner(board_setup, owner, source_name)
+
+        with pytest.raises(IllegalMoveError, match="Cannot move to the same cell"):
+            board_setup.move_piece(source_name, target_name)
+
+    # todo cannot move on same owner
+
+    # todo begin capture logic
 
     # todo
-    ### test illegal moves
-    # cannot step on non-empty cell
-    # out of bounds
-    # on existing piece
-    # on existing piece blocked from behind
-    # same player piece
+    @pytest.mark.skip
+    @pytest.mark.parametrize("source_name, target_name, owner",
+                             [("a11", "a22", "p1"), ("a13", "a22", "p1"), ("a13", "a24", "p1"),
+                              ("a82", "a71", "p2"), ("a82", "a73", "p2"), ("a88", "a77", "p2")]
+                             )
+    def test_non_capture_move_is_one_cell(self, board_setup, piece_setup, source_name, target_name, owner):
+        piece = setup_piece_on_cell_by_name_and_owner(board_setup, owner, source_name)
+        assert board_setup.get_cell_by_name(source_name).piece == piece
 
-    # todo
-    ###test capture
-    # can capture
-    # can capture if free
-    # cannot capture if not free
-    # cannot capture same owner
-
-# 4. play order
-#   keeping track
-#   switching
-# 5. win lose draw conditions
-
-# optional: add a pieces array/dict?
+        board_setup.move_piece(source_name, target_name)
+        assert board_setup.get_cell_by_name(target_name).piece == piece
+        assert board_setup.get_cell_by_name(source_name).piece is None

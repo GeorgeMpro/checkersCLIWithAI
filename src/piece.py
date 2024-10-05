@@ -1,5 +1,5 @@
 class Piece:
-    def __init__(self, player):
+    def __init__(self, player: str):
         self.in_game = True
         self.player = player
         self.playable = True

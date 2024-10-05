@@ -1,7 +1,13 @@
+import re
+
 from board_display import BoardDisplay
 from board_state import BoardState
 from cell import Cell
-from piece import Piece
+from exceptions.cell_not_found_error import CellNotFoundError
+from piece_manager import PieceManager
+from utils import increment_index, get_cell_row_from_name
+from board_initial_state import BoardInitialState
+from move_validator import MoveValidator
 
 
 class Board:
@@ -24,10 +30,18 @@ class Board:
         self.rows = rows
         self.columns = columns
         self.board = [
-            [Cell(self.increment_index(y), self.increment_index(x)) for x in range(rows)]
+            [Cell(increment_index(y), increment_index(x)) for x in range(rows)]
             for y in range(columns)]
         # generate a dictionary for O(1) access
         self.cell_map = {cell.name: cell for row in self.board for cell in row}
+        self.manager = PieceManager()
+        self.validator = MoveValidator()
+
+    def __str__(self):
+        # board_state = self.get_board_state()
+        # display = BoardDisplay(board_state=board_state)
+        # return display.construct_printable_board()
+        return BoardDisplay(self.get_board_state()).construct_printable_board()
 
     def get_cell(self, row, column):
         return self.board[row][column]
@@ -49,77 +63,37 @@ class Board:
         cell.set_piece(piece)
 
     def get_cell_by_name(self, name):
+        # check that cell name is of the form:
+        # a_ij, i,j=1,...,8  (using an 8*8 board)
+        match = re.match(r'^a([1-8])([1-8])$', name)
+
+        if (not match) or (name not in self.cell_map):
+            raise CellNotFoundError(f"Cell {name} not found")
+
         return self.cell_map[name]
 
     def get_board_state(self) -> BoardState:
         return BoardState(cells=self.board)
 
-    # todo del when done
-    # def __str__(self):
-    #     board_str = ""
-    #     for row in self.board:
-    #         board_str += " ".join([cell.name for cell in row]) + "\n"
-    #         board_str += " ".join([cell.display() for cell in row]) + "\n"
-    # return board_str
-
-    def __str__(self):
-        board_state = self.get_board_state()
-        display = BoardDisplay(board_state=board_state)
-        return display.print_board_to_player()
-
     def initial_setup(self):
-        """
-            Sets up the initial positions for players one and two.
+        initial_board_state = BoardInitialState(
+            board=self,
+            rows=self.rows,
+            columns=self.columns
+        )
 
-            Player one occupies the cells in rows 1 to 3, and player two occupies the cells in rows 6 to 8.
-            Pieces are placed on dark squares starting at a11 in a checkers pattern.
-            """
+        self.manager.initial_piece_setup(initial_board_state)
 
-        # get the cells and pieces to initialize
-        initial_cells = self.generate_initial_setup_cells_and_piece_owners()
+    def move_piece(self, source_name, target_name):
+        source_cell = self.get_cell_by_name(source_name)
+        target_cell = self.get_cell_by_name(target_name)
 
-        for cell_name, piece_owner in initial_cells:
-            self.put_piece_on_cell_by_name(cell_name, Piece(piece_owner))
+        self.validator.is_not_same_cell(source_cell, target_cell)
+        if self.is_valid_move_direction(source_cell, target_cell):
+            self.manager.move_piece_to_cell(source_cell, target_cell)
 
-    def generate_initial_setup_cells_and_piece_owners(self) -> list[tuple[str, str]]:
-        """
-            Generates a list of initial setup cells and their respective owners.
+    def is_valid_move_direction(self, source_cell, target_cell):
+        source_row = get_cell_row_from_name(source_cell)
+        target_row = get_cell_row_from_name(target_cell)
 
-            Returns:
-                A list of tuples, where each tuple contains the cell name (e.g., "a11")
-                and the owner of the piece ("p1" or "p2").
-            """
-        initial_rows_to_fill = 3
-        number_of_rows_in_cell_representation = number_of_columns_in_cell_representation = self.increment_index(
-            self._rows)
-        player_two_row_start_index = number_of_rows_in_cell_representation - initial_rows_to_fill
-
-        initial_cells = [
-                            (f"a{i}{j}", "p1") for i in range(1, initial_rows_to_fill + 1) for j in
-                            range(1, number_of_columns_in_cell_representation) if
-                            self.is_even(i, j)
-                        ] + [
-                            (f"a{i}{j}", "p2") for i in
-                            range(player_two_row_start_index,
-                                  number_of_rows_in_cell_representation) for j
-                            in
-                            range(1, number_of_columns_in_cell_representation) if
-                            self.is_even(i, j)
-                        ]
-        return initial_cells
-
-    @staticmethod
-    def is_even(i, j):
-        return (i + j) % 2 == 0
-
-    def put_piece_on_cell_by_name(self, cell_name, piece_owner):
-        cell = self.get_cell_by_name(cell_name)
-        cell.set_piece(piece_owner)
-
-    @staticmethod
-    def increment_index(index):
-        """
-        update index to start at 1 in the name of the cell
-        """
-        tmp = index + 1
-        return tmp
+        return self.validator.is_valid_move_direction(source_cell, source_row, target_row)
