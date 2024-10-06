@@ -5,12 +5,7 @@
 -check output
 
 ## board and pieces
-- board - 8*8 = 64
-- p1,p2 pieces in specific locations
-- add unicode to the pieces ( in todo file)
 - generate a game state
-    - cells that take part in the game
-    - empty/non empty and if non empty if it is p1 or p2
     - possible( legal moves)
 
 ## game logic
@@ -19,15 +14,22 @@
     - game state class
         moves, turn etc
 
+## data
+- add game status
+-game in progress
+
+
 ## players
--
+todo
+WHITE_KING = "♔"
+BLACK_KING = "♚"
 
 ## rules
 - rules prompt to the user
 	- maybe read from file
 - have to eat
 - yes/no double eat
-- no going backwards
+-king ( can move whole diagonal and stop anytime, international rules)
 
 ## game logic
 -keep game moves
@@ -35,6 +37,10 @@
     -display moves at game end
 
 ## Game Play
+- error handling when game loop is active
+    - error handling to decide whatever the move is possible and if to add it to a list or similar object to pass to player or AI
+- track turns
+- game end criteria
 - indicate if it's player 1 or 2
 - game loop
 - you play vs AI
@@ -42,14 +48,29 @@
     - choose ai type
     - choose speed of game?
 -possible moves
-    - illegal moves gives a prompt but does not exectue
+    - illegal moves gives a prompt but does not execute
     - no more moves we get a draw? a win?
+    - win condition - no more moves/captured all opponent pieces
 
 ### AI
+- a short prompt what this agent/AI/neural network ( alphazero) or python library with forward checking
+- tree expansion
+    - win condition/leafs
+#start with vs A*
+# MinMax + alpha beta pruning( saving time)
+    - explain benefit of pruning
+    - precalculate at first
+    -increase depth of search when further in the game and less pieces
+    -create an opening book?
+#MonteCarloTreeSearch + backpropogation
+# neural network with self training ( vs itself)+ use
+
+" Neural Network for Policy and Value Function (High Difficulty)
+You’ll need a neural network that acts as both a policy (predicting the best move) and a value function (predicting the expected outcome of a game from a given state).
+For a junior level, you could use a simple neural network library like TensorFlow or PyTorch, focusing on basic concepts like feedforward networks. The architecture would likely be much simpler than the AlphaZero model for Go.
+"
 
 ## general
-- start with logic > minmax > a*
-## MinMax
 
 ## A*
 

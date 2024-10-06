@@ -1,3 +1,8 @@
+from typing import Any
+
+from piece import Piece
+
+
 class Cell:
 
     def __init__(self, row, column):
@@ -22,8 +27,12 @@ class Cell:
     def has_piece(self) -> bool:
         return self.piece is not None
 
-    # todo deal when has no owner?
-    def get_piece_owner(self) -> str:
+    def get_piece(self) -> Piece:
+        return self.piece
+
+    def get_piece_owner(self) -> str | None:
+        if not self.has_piece():
+            return None
         return self.piece.player
 
     def display(self) -> str:

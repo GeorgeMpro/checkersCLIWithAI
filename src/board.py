@@ -6,8 +6,8 @@ from board_state import BoardState
 from cell import Cell
 from exceptions.cell_not_found_error import CellNotFoundError
 from piece_manager import PieceManager
-from utils import increment_index, get_cell_row_from_name
-from move_validator import MoveValidator
+from utils import increment_index, is_valid_cell_name
+from move_handler import MoveHandler
 
 
 class Board:
@@ -35,7 +35,7 @@ class Board:
         # generate a dictionary for O(1) access
         self.cell_map = {cell.name: cell for row in self.board for cell in row}
         self.manager = PieceManager()
-        self.validator = MoveValidator()
+        self.handler = MoveHandler()
 
     def __str__(self):
         # board_state = self.get_board_state()
@@ -65,7 +65,7 @@ class Board:
     def get_cell_by_name(self, name):
         # check that cell name is of the form:
         # a_ij, i,j=1,...,8  (using an 8*8 board)
-        match = re.match(r'^a([1-8])([1-8])$', name)
+        match = is_valid_cell_name(name)
 
         if (not match) or (name not in self.cell_map):
             raise CellNotFoundError(f"Cell {name} not found")
@@ -84,16 +84,22 @@ class Board:
 
         self.manager.initial_piece_setup(initial_board_state)
 
+    # todo extract to new class or simplify
     def move_piece(self, source_name, target_name):
         source_cell = self.get_cell_by_name(source_name)
         target_cell = self.get_cell_by_name(target_name)
 
-        self.validator.is_not_same_cell(source_cell, target_cell)
-        if self.is_valid_move_direction(source_cell, target_cell):
+        self.handler.validate_move(source_cell, target_cell)
+
+        if self.handler.can_capture_piece(source_cell, target_cell):
+            self.capture_piece(source_cell, target_cell)
+        else:
             self.manager.move_piece_to_cell(source_cell, target_cell)
 
-    def is_valid_move_direction(self, source_cell, target_cell):
-        source_row = get_cell_row_from_name(source_cell)
-        target_row = get_cell_row_from_name(target_cell)
+    def capture_piece(self, source_cell, target_cell):
+        cell_dest_name = self.handler.get_destination_for_capture(source_cell, target_cell)
+        self.handler.is_cell_after_capture_out_of_bounds(cell_dest_name)
+        dest_cell = self.get_cell_by_name(cell_dest_name)
+        self.handler.is_cell_available_for_capturing_piece_destination(dest_cell.get_piece())
 
-        return self.validator.is_valid_move_direction(source_cell, source_row, target_row)
+        self.handler.attempt_capture(source_cell, target_cell, dest_cell)

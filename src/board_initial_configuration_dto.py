@@ -1,3 +1,7 @@
+from dataclasses import dataclass
+
+
+@dataclass
 class BoardInitialConfigurationDTO:
     def __init__(self, board, rows, columns):
         self.board = board
