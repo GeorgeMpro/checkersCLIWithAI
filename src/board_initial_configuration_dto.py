@@ -1,4 +1,4 @@
-class BoardInitialState:
+class BoardInitialConfigurationDTO:
     def __init__(self, board, rows, columns):
         self.board = board
         self.rows = rows

@@ -1,19 +1,15 @@
 import pytest
+
+import conftest
 import piece
 from piece import Piece
 
 ROWS = COLUMNS = 8
 
 
-def put_piece_on_board(board_setup, cell_piece, row, column):
-    board_setup.set_up_piece(row, column, cell_piece)
-    cell = board_setup.get_cell(row, column)
-    return cell
-
-
 def piece_placement_setup(board_setup, piece_setup, row=0, column=0):
     cell_piece = piece_setup
-    cell = put_piece_on_board(board_setup, cell_piece, row, column)
+    cell = conftest.put_piece_on_board(board_setup, cell_piece, row, column)
     return cell, cell_piece
 
 
@@ -60,17 +56,17 @@ class TestCell:
                              )
     def test_playable_cell_has_piece(self, board_setup, piece_setup, row, col):
         cell_piece = piece_setup
-        cell = put_piece_on_board(board_setup, cell_piece, row, col)
+        cell = conftest.put_piece_on_board(board_setup, cell_piece, row, col)
         assert cell.piece is not None, "Expected cell to have a piece, but it does not."
 
     def test_non_playable_cell_cannot_setup_piece(self, board_setup, piece_setup):
         cell_piece = piece_setup
-        cell = put_piece_on_board(board_setup, cell_piece, 0, 1)
+        cell = conftest.put_piece_on_board(board_setup, cell_piece, 0, 1)
         assert cell.piece is None, "Expected cell to not have a piece, but it does."
 
     def test_cell_can_remove_piece(self, board_setup, piece_setup):
         cell_piece = piece_setup
-        cell = put_piece_on_board(board_setup, cell_piece, 0, 0)
+        cell = conftest.put_piece_on_board(board_setup, cell_piece, 0, 0)
         cell.remove_piece()
         assert cell.piece is None, "Expected cell to have a piece, but it does not."
 
@@ -78,8 +74,8 @@ class TestCell:
     def test_cell_can_display_on_board(self, board_setup, piece_setup):
         cell_empty = board_setup.get_cell(0, 1)
         cell_piece = piece_setup
-        cell_p1 = put_piece_on_board(board_setup, cell_piece, 0, 0)
-        cell_p2 = put_piece_on_board(board_setup, Piece("p2"), 1, 7)
+        cell_p1 = conftest.put_piece_on_board(board_setup, cell_piece, 0, 0)
+        cell_p2 = conftest.put_piece_on_board(board_setup, Piece("p2"), 1, 7)
         assert cell_empty.display() == " ", "expected empty cell to display space"
         assert cell_p1.display() == "X", "expected p1 cell to display X"
         assert cell_p2.display() == "O", "expected p2 cell to display O"

@@ -1,12 +1,12 @@
 import re
 
 from board_display import BoardDisplay
+from board_initial_configuration_dto import BoardInitialConfigurationDTO
 from board_state import BoardState
 from cell import Cell
 from exceptions.cell_not_found_error import CellNotFoundError
 from piece_manager import PieceManager
 from utils import increment_index, get_cell_row_from_name
-from board_initial_state import BoardInitialState
 from move_validator import MoveValidator
 
 
@@ -76,7 +76,7 @@ class Board:
         return BoardState(cells=self.board)
 
     def initial_setup(self):
-        initial_board_state = BoardInitialState(
+        initial_board_state = BoardInitialConfigurationDTO(
             board=self,
             rows=self.rows,
             columns=self.columns

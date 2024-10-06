@@ -84,7 +84,7 @@ class TestMovingOnBoard:
                               ("a82", "a82", "p2"), ("a73", "a73", "p2"), ("a88", "a88", "p2")]
                              )
     def test_cannot_move_on_itself(self, board_setup, piece_setup, source_name, target_name, owner):
-        piece = setup_piece_on_cell_by_name_and_owner(board_setup, owner, source_name)
+        setup_piece_on_cell_by_name_and_owner(board_setup, owner, source_name)
 
         with pytest.raises(IllegalMoveError, match="Cannot move to the same cell"):
             board_setup.move_piece(source_name, target_name)
