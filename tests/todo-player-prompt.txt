@@ -1,0 +1,12 @@
+Possible moves for a11:
+1. a11 -> a22
+Possible moves for a13:
+1. a13 -> a22
+2. a13 -> a24
+
+Enter the source cell (e.g., a11): a13
+Possible moves from a13:
+1. a13 -> a22
+2. a13 -> a24
+Select your move number: 1
+You selected: a13 -> a22
