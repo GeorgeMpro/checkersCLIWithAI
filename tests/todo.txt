@@ -53,11 +53,13 @@ BLACK_KING = "♚"
     - win condition - no more moves/captured all opponent pieces
 
 ### AI
-
+- go over generators with search algorithms and lazy loading
+        lazy exploration
 - a short prompt what this agent/AI/neural network ( alphazero) or python library with forward checking
 - tree expansion
     - win condition/leafs
 #start with vs A*
+        - use lazy exploration
 # MinMax + alpha beta pruning( saving time)
     - player choose depth ( with warning it take more time)?
     - explain benefit of pruning

@@ -1,14 +1,15 @@
 import re
+from typing import List, Optional
 
 from cell import Cell
-from move_state import MoveState
+from move_state import MoveState, CaptureMove
 
 
-def is_even(i, j):
+def is_even(i: int, j: int) -> bool:
     return (i + j) % 2 == 0
 
 
-def increment_index(index):
+def increment_index(index: int) -> int:
     """
     update index to start at 1 in the name of the cell
     """
@@ -16,7 +17,7 @@ def increment_index(index):
     return tmp
 
 
-def get_cell_row_from_name(source_cell):
+def get_cell_row_from_name(source_cell: Cell) -> Optional[Cell]:
     source_row = source_cell.name[1:]
     return source_row
 
@@ -27,20 +28,67 @@ def extract_index_from_cell(source_cell: Cell) -> tuple[int, int]:
     return i, j
 
 
-def is_valid_cell_name(name):
+def is_valid_cell_name(name: str) -> bool:
     try:
         return bool(re.match(r'^a([1-8])([1-8])$', name))
     except TypeError:
         return False
 
 
-def sort_moves(move_list: list[MoveState]) -> list[MoveState]:
+def moves(src_name: str, targets: List[str], is_capture: bool = False,
+          capture_moves: Optional[List[CaptureMove]] = None) -> List[MoveState]:
     """
-    Sort a list of MoveState objects based on their attributes for consistent ordering.
+    Create a list of MoveState objects for a given source and target(s).
 
-    :param move_list: A list of MoveState objects representing possible moves.
-    :return: A list of MoveState objects sorted by src_name, target_name, is_capture_move, and final_dest_name.
+    :param src_name: Source cell name for the moves.
+    :param targets: A list of target cell names for the moves.
+    :param is_capture: Whether the moves are capture moves.
+    :param capture_moves: List of capture moves, corresponding to the target cells.
+    :return: A list of MoveState objects.
     """
-    valid_moves_sorted = sorted(move_list, key=lambda move: (
-        move.src_name, move.target_name, move.is_capture_move, move.final_dest_name))
-    return valid_moves_sorted
+    if capture_moves is None:
+        # If no capture moves, return a single MoveState with all targets
+        return [
+            setup_move_state(src_name, targets, is_capture)
+        ]
+    # Otherwise, return a single MoveState with all targets and capture moves together
+    return [
+        setup_move_state(src_name, targets, is_capture, capture_moves)
+
+    ]
+
+
+def captures(name_target: str, name_final: str) -> CaptureMove:
+    return CaptureMove(name_target, name_final)
+
+
+def setup_move_state(src_name: str, targets: List[str], is_capture: bool,
+                     capture_moves: Optional[List[CaptureMove]] = None) -> MoveState:
+    return MoveState(
+        src_name=src_name,
+        target_names=targets,
+        is_capture_move=is_capture,
+        capture_moves=capture_moves
+    )
+
+
+def get_potential_moves(col_src: int, row_target: int) -> List[tuple[int, int]]:
+    """
+    Generate moves that can be done by the piece in the cell.
+    :return: move indexes
+    """
+    possible_moves = [
+        (row_target, col_src + 1),
+        (row_target, col_src - 1)
+    ]
+    return possible_moves
+
+
+def generate_move(name_src: str, target_name: List[str], is_capture_move: bool = False,
+                  capture_moves: Optional[List[CaptureMove]] = None) -> MoveState:
+    return MoveState(
+        src_name=name_src,
+        target_names=target_name,
+        is_capture_move=is_capture_move,
+        capture_moves=capture_moves
+    )

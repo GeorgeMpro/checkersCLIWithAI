@@ -1,5 +1,6 @@
-from typing import Any
+from typing import Optional
 
+from game import Player as P
 from piece import Piece
 
 
@@ -13,7 +14,7 @@ class Cell:
         self.playable = True if (row + column) % 2 == 0 else False
         self.piece = None
 
-    def set_piece(self, piece):
+    def set_piece(self, piece: Optional[Piece]):
         if self.playable:
             self.piece = piece
 
@@ -38,8 +39,8 @@ class Cell:
     def display(self) -> str:
         if self.has_piece():
             player = self.get_piece_owner()
-            return "X" if player == "p1" else "O"
-        return " "
+            return P.P1.symbol if player == P.P1.name else P.P2.symbol
+        return P.NONE.symbol
 
     def remove_piece_reference(self):
         self.piece = None

@@ -3,6 +3,9 @@ import pytest
 import conftest
 import piece
 from piece import Piece
+from utils import increment_index
+
+from game import Player as P
 
 ROWS = COLUMNS = 8
 
@@ -36,23 +39,31 @@ class TestCell:
     @pytest.mark.parametrize("y, x",
                              [(y, x) for y in range(ROWS) for x in range(COLUMNS)])
     def test_has_valid_cells(self, y, x, board_setup):
-        expected_value = f"a{y + 1}{x + 1}"
+        expected_value = f"a{increment_index(y)}{increment_index(x)}"
         cell = board_setup.get_cell(y, x)
         assert cell.name == expected_value, f"Expected {expected_value}, but got {cell.name}"
 
     @pytest.mark.parametrize("row,col,color",
-                             [(0, 0, 'black'), (0, 1, 'white'), (1, 0, 'white'), (1, 1, 'black'), (7, 7, 'black')])
+                             [(0, 0, 'black'),
+                              (0, 1, 'white'),
+                              (1, 0, 'white'),
+                              (1, 1, 'black'),
+                              (7, 7, 'black')])
     def test_cell_has_color(self, board_setup, row, col, color):
         assert board_setup.get_cell(row, col).color in color
 
     @pytest.mark.parametrize("row, col,truth_value",
-                             [(0, 0, True), (0, 1, False), (7, 7, True)]
+                             [(0, 0, True),
+                              (0, 1, False),
+                              (7, 7, True)]
                              )
     def test_cell_determine_playable(self, board_setup, row, col, truth_value):
         assert board_setup.get_cell(row, col).playable is truth_value
 
     @pytest.mark.parametrize("row, col",
-                             [(0, 0), (1, 1), (2, 0)]
+                             [(0, 0),
+                              (1, 1),
+                              (2, 0)]
                              )
     def test_playable_cell_has_piece(self, board_setup, piece_setup, row, col):
         cell_piece = piece_setup
@@ -70,7 +81,6 @@ class TestCell:
         cell.remove_piece()
         assert cell.piece is None, "Expected cell to have a piece, but it does not."
 
-    # todo clean?
     def test_cell_can_display_on_board(self, board_setup, piece_setup):
         cell_empty = board_setup.get_cell(0, 1)
         cell_piece = piece_setup
@@ -93,8 +103,9 @@ class TestPiece:
         assert cell_piece.playable is True
 
     @pytest.mark.parametrize("set_player, expected_player",
-                             [("p1", "p1"), ("p2", "p2")]
-                             )
+                             [(P.P1.name, P.P1.name),
+                              (P.P2.name, P.P2.name)
+                              ])
     def test_piece_can_have_different_owners(self, board_setup, piece_setup, set_player, expected_player):
         cell_piece = piece.Piece(set_player)
         assert cell_piece.player == expected_player
