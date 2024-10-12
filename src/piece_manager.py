@@ -1,6 +1,6 @@
 from cell import Cell
 from piece import Piece
-from utils import increment_index, is_even
+from utils import index_offset, is_even
 
 
 class PieceManager:
@@ -46,8 +46,8 @@ class PieceManager:
             and the owner of the piece ("p1" or "p2").
         """
         initial_rows_to_fill = 3
-        number_of_rows = increment_index(state.rows)
-        player_two_row_start_index = increment_index(state.rows) - initial_rows_to_fill
+        number_of_rows = index_offset(state.rows)
+        player_two_row_start_index = index_offset(state.rows) - initial_rows_to_fill
 
         # Generate initial cells for player one and player two
         initial_cells = [

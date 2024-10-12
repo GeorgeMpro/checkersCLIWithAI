@@ -7,5 +7,5 @@ class BoardInitialConfigurationDTO:
         self.board = board
         self.rows = rows
         self.columns = columns
-        self.cell_map = {cell.name: cell for row in board.get_board() for cell in row}
+        self.cell_map = {cell.name: cell for row in board for cell in row}
         self.game = game

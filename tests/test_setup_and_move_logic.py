@@ -3,6 +3,7 @@ from conftest import board_setup, piece_setup, setup_piece_on_cell_by_name_and_o
 from exceptions.cell_not_found_error import CellNotFoundError
 from exceptions.illegal_move_error import IllegalMoveError
 from game import Player as P
+from test_game_play import get_cell_by_name
 
 
 class TestBoardSetup:
@@ -13,13 +14,13 @@ class TestBoardSetup:
 
     @pytest.mark.parametrize("cell_name", cell_names)
     def test_can_get_cell_by_name(self, board_setup, cell_name):
-        cell = board_setup.get_cell_by_name(cell_name)
+        cell = get_cell_by_name(board_setup,cell_name)
         assert cell.name == cell_name
 
     @pytest.mark.parametrize("cell_name, expected_owner", init_cells)
     def test_board_can_setup_initial_players(self, board_setup, cell_name, expected_owner):
         board_setup.initial_setup()
-        cell = board_setup.get_cell_by_name(cell_name)
+        cell = get_cell_by_name(board_setup, cell_name)
         assert cell.has_piece() is not None, f"Cell {cell_name} should have a piece, but it is empty."
         assert cell.get_piece_owner() == expected_owner
 
@@ -35,11 +36,11 @@ class TestMovingOnBoard:
                               ])
     def test_piece_can_move_on_board(self, board_setup, piece_setup, source_name, target_name, owner):
         piece = setup_piece_on_cell_by_name_and_owner(board_setup, owner, source_name)
-        assert board_setup.get_cell_by_name(source_name).piece == piece
+        assert get_cell_by_name(board_setup,source_name).piece == piece
 
         board_setup.move_piece(source_name, target_name)
-        assert board_setup.get_cell_by_name(target_name).piece == piece
-        assert board_setup.get_cell_by_name(source_name).piece is None
+        assert get_cell_by_name(board_setup, target_name).piece == piece
+        assert get_cell_by_name(board_setup, source_name).piece is None
 
     @pytest.mark.parametrize("source_name, target_name,owner",
                              [("a22", "a11", P.P1.name), ("a22", "a13", P.P1.name), ("a24", "a13", P.P1.name),
@@ -47,12 +48,12 @@ class TestMovingOnBoard:
                               ])
     def test_player_cannot_move_backwards(self, board_setup, piece_setup, source_name, target_name, owner):
         piece = setup_piece_on_cell_by_name_and_owner(board_setup, owner, source_name)
-        assert board_setup.get_cell_by_name(source_name).piece == piece
+        assert get_cell_by_name(board_setup,source_name).piece == piece
 
         with pytest.raises(IllegalMoveError, match="Normal piece cannot move in opposite direction"):
             board_setup.move_piece(source_name, target_name)
-        assert board_setup.get_cell_by_name(target_name).piece is None
-        assert board_setup.get_cell_by_name(source_name).piece == piece
+        assert get_cell_by_name(board_setup, target_name).piece is None
+        assert get_cell_by_name(board_setup, source_name).piece == piece
 
     @pytest.mark.parametrize("source_name, target_name,owner",
                              [("a11", "a1-1", P.P1.name), ("a11", "a199", P.P1.name), ("a11", "a182", P.P1.name)]
@@ -119,9 +120,9 @@ class TestCapture:
         board_setup.move_piece(source, target)
 
         # assert that the pieces are removed from given locations and is its new location after capturing opponent
-        assert board_setup.get_cell_by_name(source).has_piece() is not True
-        assert board_setup.get_cell_by_name(target).has_piece() is not True
-        assert piece_in_starting_location == board_setup.get_cell_by_name(expected_cell_after_capture).piece
+        assert get_cell_by_name(board_setup, source).has_piece() is not True
+        assert get_cell_by_name(board_setup, target).has_piece() is not True
+        assert piece_in_starting_location == get_cell_by_name(board_setup, expected_cell_after_capture).piece
 
     @pytest.mark.parametrize("source ,src_owner ,target, tar_owner, expected_cell_after_capture",
                              [("a11", P.P1.name, "a22", P.P2.name, "a33"),

@@ -1,23 +1,64 @@
-# def test_player_one_moves_to_higher_index(self):
-    # def test_player_one_piece_cannot_move_backwards(self):
+
+##### 3. play order
+#todo
+    redo button
+    todo can keep possible moves
+    todo can keep past move - undo opponent, undo your move
+    deque?
+
+#todo
+        stop chain when blocked
+
+
+##### 4. win lose draw conditions
+ # todo
+    #   no piece in cell?
+    # todo
+    #   add chained capture moves to possible state? as a tree?
+    #   chained stop if blocked but have to go...
+    #   choose chain if multi?
 
     # todo
-    ### test illegal moves
-    # cannot step on non-empty cell
-    # on existing piece
-    # on existing piece blocked from behind
-    # same player piece
+    #   chained move ->
+    #   game state {player, is_chained, piece_capturing (optional none)}
+    #   when is capture = false done
 
+##### Play UI
     # todo
-    ###test capture
-    # can capture
-    # can capture if free
-    # cannot capture if not free
-    # cannot capture same owner
+    #   print board (state?)
+    #   get available moves
+    #   present moves to player
+    #   get selected move from player
+    #   apply move
+    #   check win condition
+    #   switch turns
+    #   ? log move in history?
 
-# 3. play order
-#   keeping track
-#   switching
-# 4. win lose draw conditions
+    # todo invalid move does not change board
+    # todo
+    #    test can get player turn
+    #    test player only move its pieces during turn
+
+    # todo test get move list
+    #    fetch move list according to owner?
+    #    test blocked moves not in list
+    #    test out of bound moves not in list
+    #    test backwards not in list
+    # todo a way to go over piece list for each player
+    # todo check on piece in cell error?
+
+##### Capture
+todo
+    if king can check forward and backwards? just change the if/else of the direction
 
 # optional: add a pieces array/dict?
+
+
+#### general
+- host on
+    replit?
+    pythonanywhere?
+- after win condition
+    - quit
+    - new game
+    - statistics?

@@ -1,3 +1,4 @@
+import logging
 import re
 from typing import List, Optional
 
@@ -5,13 +6,31 @@ from cell import Cell
 from move_state import MoveState, CaptureMove
 
 
+
+def get_logger(name: str):
+    """
+    Returns a logger configured for the project, logging to the console (DEBUG level).
+    Args:
+        name (str): The name of the logger, typically the module name.
+
+    Returns:
+        logger: Configured logger instance.
+    """
+    logger = logging.getLogger(name)
+    if not logger.hasHandlers():
+        log_format = '%(levelname)s - %(message)s'
+        level = logging.DEBUG
+        logging.basicConfig(level=level, format=log_format)
+    return logger
+
+
 def is_even(i: int, j: int) -> bool:
     return (i + j) % 2 == 0
 
 
-def increment_index(index: int) -> int:
+def index_offset(index: int) -> int:
     """
-    update index to start at 1 in the name of the cell
+    Increment the given index.
     """
     tmp = index + 1
     return tmp
@@ -23,20 +42,28 @@ def get_cell_row_from_name(source_cell: Cell) -> Optional[Cell]:
 
 
 def extract_index_from_cell(source_cell: Cell) -> tuple[int, int]:
+    """
+    Extract the i,j values from cell a_ij.
+    """
     source_index = re.match(r'a(\d)(\d)', source_cell.name)
     i, j = int(source_index[1]), int(source_index[2])
     return i, j
 
 
 def is_valid_cell_name(name: str) -> bool:
+    """
+    Check if cell name is board bounds.
+    """
     try:
         return bool(re.match(r'^a([1-8])([1-8])$', name))
     except TypeError:
         return False
 
 
-def moves(src_name: str, targets: List[str], is_capture: bool = False,
-          capture_moves: Optional[List[CaptureMove]] = None) -> List[MoveState]:
+def moves(
+        src_name: str, targets: List[str], is_capture: bool = False,
+        capture_moves: Optional[List[CaptureMove]] = None
+) -> List[MoveState]:
     """
     Create a list of MoveState objects for a given source and target(s).
 
@@ -49,30 +76,23 @@ def moves(src_name: str, targets: List[str], is_capture: bool = False,
     if capture_moves is None:
         # If no capture moves, return a single MoveState with all targets
         return [
-            setup_move_state(src_name, targets, is_capture)
+            generate_move(src_name, targets, is_capture)
         ]
     # Otherwise, return a single MoveState with all targets and capture moves together
     return [
-        setup_move_state(src_name, targets, is_capture, capture_moves)
-
+        generate_move(src_name, targets, is_capture, capture_moves)
     ]
 
 
 def captures(name_target: str, name_final: str) -> CaptureMove:
+    """
+    Generate capture moves for a given target name and final destination.
+    E.g. a11->a22->a33, a11 targets opponent on a22 and finally lands on a33.
+    """
     return CaptureMove(name_target, name_final)
 
 
-def setup_move_state(src_name: str, targets: List[str], is_capture: bool,
-                     capture_moves: Optional[List[CaptureMove]] = None) -> MoveState:
-    return MoveState(
-        src_name=src_name,
-        target_names=targets,
-        is_capture_move=is_capture,
-        capture_moves=capture_moves
-    )
-
-
-def get_potential_moves(col_src: int, row_target: int) -> List[tuple[int, int]]:
+def get_potential_moves(row_target: int, col_src: int) -> List[tuple[int, int]]:
     """
     Generate moves that can be done by the piece in the cell.
     :return: move indexes
@@ -84,8 +104,10 @@ def get_potential_moves(col_src: int, row_target: int) -> List[tuple[int, int]]:
     return possible_moves
 
 
-def generate_move(name_src: str, target_name: List[str], is_capture_move: bool = False,
-                  capture_moves: Optional[List[CaptureMove]] = None) -> MoveState:
+def generate_move(
+        name_src: str, target_name: List[str], is_capture_move: bool = False,
+        capture_moves: Optional[List[CaptureMove]] = None
+) -> MoveState:
     return MoveState(
         src_name=name_src,
         target_names=target_name,

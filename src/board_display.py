@@ -20,7 +20,9 @@ class BoardDisplay:
         # Construct the entire board representation
         return self.generate_board_representation(cells, columns)
 
-    def generate_board_representation(self, cells: list, columns: int) -> str:
+    def generate_board_representation(
+            self, cells: list, columns: int
+    ) -> str:
         """
         Generate the entire board representation, including headers, rows, and borders.
 

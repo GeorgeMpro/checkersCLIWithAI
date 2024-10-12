@@ -1,18 +1,17 @@
 import pytest
 
-import conftest
 import piece
-from piece import Piece
-from utils import increment_index
-
+from conftest import put_piece_on_cell_and_return_cell, get_cell_by_index
 from game import Player as P
+from piece import Piece
+from utils import index_offset
 
 ROWS = COLUMNS = 8
 
 
 def piece_placement_setup(board_setup, piece_setup, row=0, column=0):
     cell_piece = piece_setup
-    cell = conftest.put_piece_on_cell_and_return_cell(board_setup, cell_piece, row, column)
+    cell = put_piece_on_cell_and_return_cell(board_setup, cell_piece, row, column)
     return cell, cell_piece
 
 
@@ -34,13 +33,13 @@ class TestBoard:
 
 class TestCell:
     def test_cell_has_name(self, board_setup):
-        assert board_setup.get_cell(0, 0).name == 'a11'
+        assert get_cell_by_index(board_setup, 0, 0).name == 'a11'
 
-    @pytest.mark.parametrize("y, x",
-                             [(y, x) for y in range(ROWS) for x in range(COLUMNS)])
-    def test_has_valid_cells(self, y, x, board_setup):
-        expected_value = f"a{increment_index(y)}{increment_index(x)}"
-        cell = board_setup.get_cell(y, x)
+    @pytest.mark.parametrize("x, y",
+                             [(x, y) for x in range(ROWS) for y in range(COLUMNS)])
+    def test_has_valid_cells(self, x, y, board_setup):
+        expected_value = f"a{index_offset(x)}{index_offset(y)}"
+        cell = get_cell_by_index(board_setup, x, y)
         assert cell.name == expected_value, f"Expected {expected_value}, but got {cell.name}"
 
     @pytest.mark.parametrize("row,col,color",
@@ -50,7 +49,7 @@ class TestCell:
                               (1, 1, 'black'),
                               (7, 7, 'black')])
     def test_cell_has_color(self, board_setup, row, col, color):
-        assert board_setup.get_cell(row, col).color in color
+        assert get_cell_by_index(board_setup, col, row).color in color
 
     @pytest.mark.parametrize("row, col,truth_value",
                              [(0, 0, True),
@@ -58,7 +57,7 @@ class TestCell:
                               (7, 7, True)]
                              )
     def test_cell_determine_playable(self, board_setup, row, col, truth_value):
-        assert board_setup.get_cell(row, col).playable is truth_value
+        assert get_cell_by_index(board_setup, col, row).playable is truth_value
 
     @pytest.mark.parametrize("row, col",
                              [(0, 0),
@@ -67,25 +66,25 @@ class TestCell:
                              )
     def test_playable_cell_has_piece(self, board_setup, piece_setup, row, col):
         cell_piece = piece_setup
-        cell = conftest.put_piece_on_cell_and_return_cell(board_setup, cell_piece, row, col)
+        cell = put_piece_on_cell_and_return_cell(board_setup, cell_piece, row, col)
         assert cell.piece is not None, "Expected cell to have a piece, but it does not."
 
     def test_non_playable_cell_cannot_setup_piece(self, board_setup, piece_setup):
         cell_piece = piece_setup
-        cell = conftest.put_piece_on_cell_and_return_cell(board_setup, cell_piece, 0, 1)
+        cell = put_piece_on_cell_and_return_cell(board_setup, cell_piece, 0, 1)
         assert cell.piece is None, "Expected cell to not have a piece, but it does."
 
     def test_cell_can_remove_piece(self, board_setup, piece_setup):
         cell_piece = piece_setup
-        cell = conftest.put_piece_on_cell_and_return_cell(board_setup, cell_piece, 0, 0)
+        cell = put_piece_on_cell_and_return_cell(board_setup, cell_piece, 0, 0)
         cell.remove_piece()
         assert cell.piece is None, "Expected cell to have a piece, but it does not."
 
     def test_cell_can_display_on_board(self, board_setup, piece_setup):
-        cell_empty = board_setup.get_cell(0, 1)
+        cell_empty = get_cell_by_index(board_setup, 1, 0)
         cell_piece = piece_setup
-        cell_p1 = conftest.put_piece_on_cell_and_return_cell(board_setup, cell_piece, 0, 0)
-        cell_p2 = conftest.put_piece_on_cell_and_return_cell(board_setup, Piece("p2"), 1, 7)
+        cell_p1 = put_piece_on_cell_and_return_cell(board_setup, cell_piece, 0, 0)
+        cell_p2 = put_piece_on_cell_and_return_cell(board_setup, Piece("p2"), 1, 7)
         assert cell_empty.display() == " ", "expected empty cell to display space"
         assert cell_p1.display() == "X", "expected p1 cell to display X"
         assert cell_p2.display() == "O", "expected p2 cell to display O"
