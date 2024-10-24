@@ -154,6 +154,8 @@ def assert_stays_king(board_setup, source_name, target_name):
     assert board_setup.cell_manager.get_cell_by_name(target_name).is_king()
 
 
+
+
 def set_king_by_cell_name(
         board_setup, cell_name: str
 ) -> None:
