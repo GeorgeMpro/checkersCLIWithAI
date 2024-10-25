@@ -1,13 +1,13 @@
 from typing import List
 
-from cell import Cell
+from component.cell import Cell
 from exceptions.cell_not_found_error import CellNotFoundError
 from exceptions.illegal_move_error import IllegalMoveError
-from move_manager import validate_move, get_destination_cell_name_after_capture, enforce_mandatory_capture, \
+from managers.move_manager import validate_move, get_destination_cell_name_after_capture, enforce_mandatory_capture, \
     validate_capture_final_destination_is_in_bounds, validate_capture_final_destination_is_available, execute_capture, \
     handle_mandatory_capture, manage_adding_moves_property_to_given_cells, validate_capture_move, generate_normal_moves, \
     generate_king_moves
-from move_state import MoveState
+from state.move_state import MoveState
 from utils import index_offset, is_valid_cell_name, extract_index_from_cell, get_logger
 
 logger = get_logger(name='cell_manager')

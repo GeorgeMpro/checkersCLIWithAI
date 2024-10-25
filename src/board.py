@@ -1,15 +1,14 @@
-from board_display import BoardDisplay
-from board_initial_configuration_dto import BoardInitialConfigurationDTO
-from board_state import BoardState
-from cell import Cell
-from cell_manager import CellManager, logger
-from game import Game, P
-from move_manager import get_destination_cell_name_after_capture, can_capture_piece, \
+from display.board_display import BoardDisplay
+from state.board_initial_configuration_dto import BoardInitialConfigurationDTO
+from state.board_state import BoardState
+from component.cell import Cell
+from component.game import Game, P
+from managers.cell_manager import CellManager
+from managers.move_manager import get_destination_cell_name_after_capture, can_capture_piece, \
     mange_chained_move, format_available_moves
-from move_state import MoveState
-from piece import Piece
-from piece_manager import PieceManager
-from utils import extract_index_from_cell
+from state.move_state import MoveState
+from component.piece import Piece
+from managers.piece_manager import PieceManager
 
 
 class Board:

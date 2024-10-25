@@ -3,8 +3,7 @@ import pytest
 from conftest import setup_piece_on_cell_by_name_and_owner, board_setup, assert_player_turn_after_move, setup_board, \
     get_cell_by_name, get_valid_moves_for_given_cell
 from exceptions.illegal_move_error import IllegalMoveError
-from game import Player as P
-from move_state import MoveState
+from component.game import Player as P
 from utils import moves, captures
 
 

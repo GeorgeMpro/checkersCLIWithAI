@@ -1,4 +1,4 @@
-from board_state import BoardState  # Import the BoardState DTO
+from state.board_state import BoardState  # Import the BoardState DTO
 
 
 class BoardDisplay:

@@ -1,9 +1,9 @@
 import pytest
 
-import piece
+from component import piece
 from conftest import put_piece_on_cell_and_return_cell, get_cell_by_index
-from game import Player as P
-from piece import Piece
+from component.game import Player as P
+from component.piece import Piece
 from utils import index_offset
 
 ROWS = COLUMNS = 8

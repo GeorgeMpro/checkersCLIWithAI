@@ -1,5 +1,5 @@
-from cell import Cell
-from piece import Piece
+from component.cell import Cell
+from component.piece import Piece
 from utils import index_offset, is_even
 
 

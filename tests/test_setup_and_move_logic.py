@@ -2,7 +2,7 @@ import pytest
 from conftest import board_setup, piece_setup, setup_piece_on_cell_by_name_and_owner
 from exceptions.cell_not_found_error import CellNotFoundError
 from exceptions.illegal_move_error import IllegalMoveError
-from game import Player as P
+from component.game import Player as P
 from test_game_play import get_cell_by_name
 
 

@@ -1,22 +1,22 @@
 from io import StringIO
-from typing import Tuple
 
 import pytest
 
-from cli import get_choice
+from display.cli import get_choice
 from conftest import setup_board
-from game import P
-from move_state import MoveState
+from component.game import P
+from state.move_state import MoveState
 from utils import captures
 
 
 @pytest.fixture
-def options() -> list[str]:
-    return [
-        "[1] a11 -> a22",
-        "[2] a11 -> a33",
-        "[3] a22 -> a33"
-    ]
+def options() -> dict:
+    return {
+        1: "[1] a11 -> a22",
+        2: "[2] a11 -> a33",
+        3: "[3] a22 -> a33",
+        'q': "quit"
+    }
 
 
 def mock_user_input(monkeypatch, user_in):
@@ -88,7 +88,7 @@ class TestGameInteraction:
 
         selection, option = get_choice(options)
         assert selection == expected
-        assert option == options[expected - 1]
+        assert option == options.get(expected)
 
     # todo
     @pytest.mark.parametrize("user_in, expected", [
@@ -102,14 +102,16 @@ class TestGameInteraction:
         captured = capsys.readouterr()
 
         # Notice: the \n at the end of the capture is due to the user entering the input.
-        user_expected_wrong_input_prompt = f"\nPlease choose a move from:\n{"\n".join(options)}\n"
+        # todo update or keep?
+        # user_expected_wrong_input_prompt = f"\nPlease choose a move from:\n{"\n".join(options)}\n"
 
+        user_expected_wrong_input_prompt = f"\nPlease choose a move from:\n" + "\n".join(
+            f"{k}: {v}" for k, v in options.items()) + "\n"
         # assert
         assert captured.out == user_expected_wrong_input_prompt
         assert selection == expected
-        assert option == options[expected - 1]
+        assert option == options.get(expected)
 
-    # todo
     @pytest.mark.parametrize("user_in, expected", [
         ("q", 'q'),
         ("1213\n0\nq\n", 'q')
@@ -121,16 +123,28 @@ class TestGameInteraction:
         captured = capsys.readouterr()
 
         assert selection == expected
-        assert option == "quit"
-        assert "Exiting the game." in captured.out
-        pass
+        assert option == options.get(expected)
+        assert "Quitting the game." in captured.out
 
     # todo
-    def test_handle_invalid_user_input(self):
-        # todo
-        #   empty string \n
-        #   non given numbers
-        #   unknown chars
+    # @pytest.mark.skip
+    @pytest.mark.parametrize("user_in, expected", [
+        ("\nq", 'q'),
+        ("~\n1213\n0\nq\n", 'q'),
+        ("abc\n1", 1),
+        ("1 1\n2", 2),
+    ])
+    def test_handle_invalid_user_input(self, monkeypatch, capsys, options, user_in, expected):
+        # setup
+        mock_user_input(monkeypatch, user_in)
+        selection, option = get_choice(options)
+        captured = capsys.readouterr()
+
+        assert selection == expected
+        assert option == options.get(expected)
+
+    #     todo
+    def test_can_execute_user_command_on_board(self):
         pass
 
 

@@ -1,9 +1,9 @@
 import pytest
 import board
-import piece
+from component import piece
 
-from piece import Piece
-from cell import Cell
+from component.piece import Piece
+from component.cell import Cell
 
 
 @pytest.fixture

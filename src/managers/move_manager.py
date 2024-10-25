@@ -1,11 +1,11 @@
 from typing import List, Optional
 
-from cell import Cell
+from component.cell import Cell
 from exceptions.cell_not_found_error import CellNotFoundError
 from exceptions.illegal_move_error import IllegalMoveError
-from game import Player as P
-from move_state import MoveState, CaptureMove
-from piece import Piece
+from component.game import Player as P
+from state.move_state import MoveState, CaptureMove
+from component.piece import Piece
 from utils import extract_index_from_cell, get_cell_row_from_name, is_valid_cell_name, captures, generate_move, \
     get_potential_moves, index_offset
 

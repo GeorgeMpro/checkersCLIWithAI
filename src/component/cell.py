@@ -1,7 +1,7 @@
 from typing import Optional
 
-from game import Player as P
-from piece import Piece
+from .game import Player as P
+from .piece import Piece
 
 
 class Cell:
