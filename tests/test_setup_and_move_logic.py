@@ -2,7 +2,7 @@ import pytest
 from conftest import board_setup, piece_setup, setup_piece_on_cell_by_name_and_owner
 from exceptions.cell_not_found_error import CellNotFoundError
 from exceptions.illegal_move_error import IllegalMoveError
-from game import Player as P
+from component.game import Player as P
 from test_game_play import get_cell_by_name
 
 
@@ -14,7 +14,7 @@ class TestBoardSetup:
 
     @pytest.mark.parametrize("cell_name", cell_names)
     def test_can_get_cell_by_name(self, board_setup, cell_name):
-        cell = get_cell_by_name(board_setup,cell_name)
+        cell = get_cell_by_name(board_setup, cell_name)
         assert cell.name == cell_name
 
     @pytest.mark.parametrize("cell_name, expected_owner", init_cells)
@@ -36,7 +36,7 @@ class TestMovingOnBoard:
                               ])
     def test_piece_can_move_on_board(self, board_setup, piece_setup, source_name, target_name, owner):
         piece = setup_piece_on_cell_by_name_and_owner(board_setup, owner, source_name)
-        assert get_cell_by_name(board_setup,source_name).piece == piece
+        assert get_cell_by_name(board_setup, source_name).piece == piece
 
         board_setup.move_piece(source_name, target_name)
         assert get_cell_by_name(board_setup, target_name).piece == piece
@@ -48,7 +48,7 @@ class TestMovingOnBoard:
                               ])
     def test_player_cannot_move_backwards(self, board_setup, piece_setup, source_name, target_name, owner):
         piece = setup_piece_on_cell_by_name_and_owner(board_setup, owner, source_name)
-        assert get_cell_by_name(board_setup,source_name).piece == piece
+        assert get_cell_by_name(board_setup, source_name).piece == piece
 
         with pytest.raises(IllegalMoveError, match="Normal piece cannot move in opposite direction"):
             board_setup.move_piece(source_name, target_name)
@@ -110,7 +110,7 @@ class TestCapture:
                              [("a11", P.P1.name, "a22", P.P2.name, "a33"),
                               ("a13", P.P1.name, "a22", P.P2.name, "a31"),
                               ("a82", P.P2.name, "a73", P.P1.name, "a64"),
-                              ("a84", P.P2.name, "a73", P.P1.name, "a62")
+                              ("a84", P.P2.name, "a73", P.P1.name, "a62"),
                               ])
     def test_can_capture_opponent(self, board_setup, piece_setup, source, src_owner, target, tar_owner,
                                   expected_cell_after_capture):
@@ -125,10 +125,11 @@ class TestCapture:
         assert piece_in_starting_location == get_cell_by_name(board_setup, expected_cell_after_capture).piece
 
     @pytest.mark.parametrize("source ,src_owner ,target, tar_owner, expected_cell_after_capture",
-                             [("a11", P.P1.name, "a22", P.P2.name, "a33"),
-                              ("a13", P.P1.name, "a22", P.P2.name, "a31"),
+                             [("a13", P.P1.name, "a22", P.P2.name, "a31"),
+                              # todo this is an end game conditon
+                              # ("a11", P.P1.name, "a22", P.P2.name, "a33"),
                               ("a82", P.P2.name, "a73", P.P1.name, "a64"),
-                              ("a84", P.P2.name, "a73", P.P1.name, "a62")
+                              ("a84", P.P2.name, "a73", P.P1.name, "a62"),
                               ])
     def test_cannot_capture_if_after_capture_destination_is_blocked(self, board_setup, piece_setup, source, src_owner,
                                                                     target, tar_owner,
@@ -146,7 +147,8 @@ class TestCapture:
                              [("a22", P.P1.name, "a31", P.P2.name),
                               ("a17", P.P1.name, "a28", P.P2.name),
                               ("a82", P.P2.name, "a71", P.P1.name),
-                              ("a77", P.P2.name, "a68", P.P1.name,)
+                              ("a77", P.P2.name, "a68", P.P1.name,),
+                              ("a42", P.P1.name, "a51", P.P2.name)
                               ])
     def test_cannot_capture_if_after_capture_destination_is_out_of_bounds(self, piece_setup, board_setup, source,
                                                                           src_owner, target, tar_owner, ):

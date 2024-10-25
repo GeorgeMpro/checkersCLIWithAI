@@ -1,13 +1,13 @@
 from typing import List
 
-from cell import Cell
+from component.cell import Cell
 from exceptions.cell_not_found_error import CellNotFoundError
 from exceptions.illegal_move_error import IllegalMoveError
-from move_manager import validate_move, get_destination_cell_name_after_capture, enforce_mandatory_capture, \
-    validate_capture_final_destination_is_in_bounds, validate_capture_final_destination_is_available, execute_capture, \
+from managers.move_manager import validate_move, get_destination_cell_name_after_capture, enforce_mandatory_capture, \
+    validate_capture_final_destination_is_in_bounds, validate_capture_final_destination_is_available, \
     handle_mandatory_capture, manage_adding_moves_property_to_given_cells, validate_capture_move, generate_normal_moves, \
-    generate_king_moves
-from move_state import MoveState
+    generate_king_moves, filter_invalid_moves
+from state.move_state import MoveState
 from utils import index_offset, is_valid_cell_name, extract_index_from_cell, get_logger
 
 logger = get_logger(name='cell_manager')
@@ -40,14 +40,17 @@ class CellManager:
     def get_cell_map(self) -> dict[str, Cell]:
         return self.cell_map
 
-    def get_cell_by_name(self, name: str) -> Cell:
+    def get_cell_by_name(self, name: str) -> Cell | None:
         """
         Get a cell by its a_ij name.
         """
-        self.validate_cell_name(name)
+        # todo?
+        # deal with error logging
+        # try:
+        self._validate_cell_name(name)
         return self.cell_map[name]
 
-    def validate_cell_name(self, name: str) -> None:
+    def _validate_cell_name(self, name: str) -> None:
         """
         Check that cell name is of the form: a_ij, i,j=1,...,8  (using an 8*8 board)
         E.g. a13 is on board, a03 is not.
@@ -63,8 +66,9 @@ class CellManager:
 
         return source_cell, target_cell
 
+    # todo
     def validate_capture_logic(self, source_cell: Cell, target_cell: Cell) -> None:
-        move_list = self.get_valid_moves_for_given_cell(source_cell)
+        move_list = self._get_valid_move_directions_for_cell(source_cell)
         move_dto = move_list[0]
         has_capture_moves = move_dto.is_capture_move
         # Raise error if there are capture moves but a normal move is attempted
@@ -78,10 +82,24 @@ class CellManager:
         validate_capture_final_destination_is_available(dest_cell.get_piece())
 
         # execute capture
-        execute_capture(source_cell, target_cell, dest_cell)
+        self.execute_capture(source_cell, target_cell, dest_cell)
+
+    @staticmethod
+    def execute_capture(source_cell: Cell, target_cell: Cell, dest_cell: Cell
+                        ) -> None:
+        """
+        Execute capture move.
+        """
+        piece_to_move = source_cell.get_piece()
+
+        dest_cell.set_piece(piece_to_move)
+
+        #  clean source and target cells from pieces
+        source_cell.remove_piece()
+        target_cell.remove_piece()
 
     # todo update to handle kings
-    def get_valid_moves_for_given_cell(self, cell: Cell) -> list[MoveState]:
+    def _get_valid_move_directions_for_cell(self, cell: Cell) -> list[MoveState]:
 
         """
         Get valid moves for the piece on given cell under the game rules.
@@ -98,15 +116,23 @@ class CellManager:
 
         return self.handle_adding_valid_moves(cell.name, possible_moves)
 
-
-    def handle_adding_valid_moves(self, name_src: str, possible_moves: List[tuple[int, int]]) -> list[MoveState]:
+    # todo refactor
+    def handle_adding_valid_moves(
+            self, name_src: str, possible_moves: List[tuple[int, int]]
+    ) -> list[MoveState]:
         # the filtered cell list to be added
-        cells = handle_mandatory_capture(self.get_valid_cells(name_src, possible_moves))
+        cells = handle_mandatory_capture(
+            self.get_valid_cells(name_src, possible_moves),
+            self.get_cell_map()
+        )
+        filtered_moves = filter_invalid_moves(cells)
 
         # todo wrong return type?
-        return manage_adding_moves_property_to_given_cells(cells)
+        return manage_adding_moves_property_to_given_cells(filtered_moves)
 
-    def get_valid_cells(self, name_src: str, possible_moves: List[tuple[int, int]]) -> list[tuple[Cell, Cell]]:
+    def get_valid_cells(
+            self, name_src: str, possible_moves: List[tuple[int, int]]
+    ) -> list[tuple[Cell, Cell]]:
         """
         Generate a list of moves which are in the board's boundaries.
         """
@@ -114,7 +140,10 @@ class CellManager:
         for row, col in possible_moves:
             name_target = f"a{row}{col}"
             try:
-                cells.append(self.validate_cell_source_and_target_names(name_src, name_target))
+                cell_pair = self.validate_cell_source_and_target_names(name_src, name_target)
+                if cell_pair[0] is not None and cell_pair[1]:
+                    # cells.append(self.validate_cell_source_and_target_names(name_src, name_target))
+                    cells.append(cell_pair)
             except(IllegalMoveError, CellNotFoundError) as e:
                 logger.error(f"Invalid move: {e}")
                 continue
@@ -133,7 +162,7 @@ class CellManager:
         Check whether a capture move will lead to more captures.
         """
         cell_final_dest = self.get_cell_by_name(final_dest_name)
-        chain_moves = self.get_valid_moves_for_given_cell(cell_final_dest)
+        chain_moves = self._get_valid_move_directions_for_cell(cell_final_dest)
         has_valid_chain_capture = False
         for move in chain_moves:
             # Check if any move is a valid chain capture
@@ -182,11 +211,11 @@ class CellManager:
         """
         Generate moves for the player whose turn is to play.
         """
-        cells = self.get_player_cells(player)
+        cells = self._get_player_cells(player)
 
-        return self.generate_player_move_states(cells)
+        return self._generate_player_move_states(cells)
 
-    def get_player_cells(self, player: str) -> list[Cell]:
+    def _get_player_cells(self, player: str) -> list[Cell]:
         """
         Get all cells owned by the current player
         """
@@ -196,7 +225,7 @@ class CellManager:
         ]
         return player_cells
 
-    def generate_player_move_states(
+    def _generate_player_move_states(
             self, player_cells: List[Cell]
     ) -> List[MoveState]:
         """
@@ -204,27 +233,30 @@ class CellManager:
         """
 
         # First Pass:
-        has_capture_moves = self.check_cells_for_capture_moves(player_cells)
+        has_capture_moves = self._check_cells_for_capture_moves(player_cells)
 
-        return self.generate_filtered_moves(has_capture_moves, player_cells)
+        return self._generate_filtered_moves(has_capture_moves, player_cells)
 
-    def check_cells_for_capture_moves(self, cells: List[Cell]) -> bool:
+    def _check_cells_for_capture_moves(
+            self, cells: List[Cell]
+    ) -> bool:
         """
         Check if any of the available moves are capture moves.
         """
+        # todo check for final dest in bounds
         return any(
             move.is_capture_move  # condition
             for cell in cells  # outer loop
-            for move in self.get_valid_moves_for_given_cell(cell)  # inner loop
+            for move in self._get_valid_move_directions_for_cell(cell)  # inner loop
         )
 
-    def generate_filtered_moves(self, has_capture_moves, player_cells):
+    def _generate_filtered_moves(self, has_capture_moves: bool, player_cells: list[Cell]):
         """
         Generate a list of valid moves for the player's pieces, filtered based on capture availability.
         """
         return [
             move  # Add the move to the list if conditions are met
             for cell in player_cells  # Iterate over each player's cell
-            for move in self.get_valid_moves_for_given_cell(cell)  # Get valid moves for the cell
+            for move in self._get_valid_move_directions_for_cell(cell)  # Get valid moves for the cell
             if (has_capture_moves and move.is_capture_move) or not has_capture_moves  # Conditional inclusion
         ]

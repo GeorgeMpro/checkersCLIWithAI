@@ -1,27 +1,63 @@
 from typing import List, Optional
 
-from cell import Cell
+from component.cell import Cell
+from component.game import Player as P
+from component.piece import Piece
 from exceptions.cell_not_found_error import CellNotFoundError
 from exceptions.illegal_move_error import IllegalMoveError
-from game import Player as P
-from move_state import MoveState, CaptureMove
-from piece import Piece
+from state.move_state import MoveState, CaptureMove
 from utils import extract_index_from_cell, get_cell_row_from_name, is_valid_cell_name, captures, generate_move, \
     get_potential_moves, index_offset
+
+
+def filter_invalid_moves(
+        cells: list[tuple[Cell, Cell]]
+) -> list[tuple[Cell, Cell]]:
+    """
+    Filters out invalid moves from a list of cell pairs representing potential moves.
+
+    Args:
+        cells (list[tuple[Cell, Cell]]): A list of tuples, where each tuple contains a source cell and a target cell.
+
+    Returns:
+        list[tuple[Cell, Cell]]: A list of tuples with only valid moves, excluding any moves that violate game rules
+        (e.g., moving to own piece or out of bounds).
+
+    Usage:
+        Use this function to clean up a list of possible moves before displaying or applying them in the game.
+
+    Example:
+        valid_moves = filter_invalid_moves(possible_moves)
+    """
+    return [
+        (cell_src, cell_target) for cell_src, cell_target in cells
+        if _is_valid_move(cell_src, cell_target)
+    ]
 
 
 def validate_move(source_cell: Cell, target_cell: Cell) -> None:
     """
     Validates the legality and in-game boundaries of a move.
     """
-    is_not_same_cell(source_cell, target_cell)
-    is_valid_distance(source_cell, target_cell)
-    is_not_same_owner(source_cell, target_cell)
+    _is_not_same_cell(source_cell, target_cell)
+    _is_valid_distance(source_cell, target_cell)
+    _is_not_same_owner(source_cell, target_cell)
     if not source_cell.is_king():
-        is_valid_move_direction(source_cell, target_cell)
+        _is_valid_move_direction(source_cell, target_cell)
 
 
-def is_valid_move_direction(source_cell: Cell, target_cell: Cell) -> None:
+def _is_valid_move(source: Cell, target: Cell) -> bool:
+    """
+    Utility valid move filter.
+    """
+    try:
+        validate_move(source, target)  # Ensure it meets move rules
+        return True
+    except (IllegalMoveError, CellNotFoundError):
+        return False
+
+
+def _is_valid_move_direction(source_cell: Cell, target_cell: Cell) -> None:
     """
     Validate the direction in which normal pieces can go on the board.
     """
@@ -38,7 +74,7 @@ def is_valid_move_direction(source_cell: Cell, target_cell: Cell) -> None:
         raise IllegalMoveError("Normal piece cannot move in opposite direction")
 
 
-def is_not_same_cell(source_cell: Cell, target_cell: Cell) -> None:
+def _is_not_same_cell(source_cell: Cell, target_cell: Cell) -> None:
     """
     Cannot move to the came cell you are currently on.
     """
@@ -46,7 +82,7 @@ def is_not_same_cell(source_cell: Cell, target_cell: Cell) -> None:
         raise IllegalMoveError("Cannot move to the same cell")
 
 
-def is_valid_distance(source_cell: Cell, target_cell: Cell) -> None:
+def _is_valid_distance(source_cell: Cell, target_cell: Cell) -> None:
     """
     Normal moves have a distance of 1 playable cell away.
     """
@@ -60,7 +96,7 @@ def is_valid_distance(source_cell: Cell, target_cell: Cell) -> None:
         raise IllegalMoveError("Non capture move is a single cell distance.")
 
 
-def is_not_same_owner(source_cell: Cell, target_cell: Cell) -> None:
+def _is_not_same_owner(source_cell: Cell, target_cell: Cell) -> None:
     """
     Cannon capture pieces your own pieces.
     """
@@ -94,13 +130,13 @@ def get_destination_cell_name_after_capture(
     row_src, col_src = extract_index_from_cell(source_cell)
     row_trg, col_trg = extract_index_from_cell(target_cell)
 
-    row_dest = get_row_direction_for_capture(source_cell, row_src, row_trg)
+    row_dest = _get_row_direction_for_capture(source_cell, row_src, row_trg)
     col_dest = col_trg + 1 if col_trg > col_src else col_trg - 1
 
     return f"a{row_dest}{col_dest}"
 
 
-def get_row_direction_for_capture(
+def _get_row_direction_for_capture(
         source_cell: Cell, source_row: int, target_row: int
 ) -> int:
     """
@@ -119,29 +155,15 @@ def get_row_direction_for_capture(
     return row_direction_by_player[source_cell.get_piece_owner()](target_row)
 
 
-def execute_capture(
-        source_cell: Cell, target_cell: Cell, dest_cell: Cell
-) -> None:
-    """
-    Execute capture move.
-    """
-    piece_to_move = source_cell.get_piece()
-
-    dest_cell.set_piece(piece_to_move)
-
-    #  clean source and target cells from pieces
-    source_cell.remove_piece()
-    target_cell.remove_piece()
-
-
-def validate_capture_move(cell: Cell, cell_piece: Piece) -> None:
+def validate_capture_move(final_dest_cell: Cell, final_dest_cell_piece: Piece) -> None:
     """
     Validate capture logic.
     """
-    validate_capture_final_destination_is_available(cell_piece)
-    validate_capture_final_destination_is_in_bounds(cell.name)
+    validate_capture_final_destination_is_in_bounds(final_dest_cell.name)
+    validate_capture_final_destination_is_available(final_dest_cell_piece)
 
 
+# todo
 def validate_capture_final_destination_is_available(
         cell_piece: Piece
 ) -> None:
@@ -163,12 +185,12 @@ def manage_adding_moves_property_to_given_cells(
     for cell_src, cell_target in cells:
         name_src = cell_src.name
         name_target = cell_target.name
-        add_moves_property(cell_src, cell_target, name_src, name_target, valid_moves)
+        _add_moves_property(cell_src, cell_target, name_src, name_target, valid_moves)
 
     return valid_moves
 
 
-def add_moves_property(
+def _add_moves_property(
         cell_src: Cell, cell_target: Cell, name_src: str, name_target: str,
         valid_moves: List[MoveState]
 ) -> None:
@@ -178,27 +200,27 @@ def add_moves_property(
     if can_capture_piece(cell_src, cell_target):
         name_dest = get_destination_cell_name_after_capture(cell_src, cell_target)
         capture_move = captures(name_target, name_dest)
-        manage_moves(name_src, name_target, valid_moves, capture_move)
+        _manage_moves(name_src, name_target, valid_moves, capture_move)
     else:
         # Normal move, no capture
-        manage_moves(name_src, name_target, valid_moves)
+        _manage_moves(name_src, name_target, valid_moves)
 
 
-def manage_moves(
+def _manage_moves(
         name_src: str, name_target: str, valid_moves: List[MoveState],
         capture_move: Optional[CaptureMove] = None
 ) -> None:
     """Find or create a move for a given source and target."""
 
     # Try to find an existing move
-    move = find_move_state(name_src, valid_moves)
+    move = _find_move_state(name_src, valid_moves)
     if move:
-        update_move(move, name_target, capture_move)
+        _update_move(move, name_target, capture_move)
     else:
-        create_move(name_src, name_target, valid_moves, capture_move)
+        _create_move(name_src, name_target, valid_moves, capture_move)
 
 
-def find_move_state(
+def _find_move_state(
         name_src: str, valid_moves: List[MoveState]
 ) -> Optional[MoveState]:
     """Find an existing move with the given source name."""
@@ -208,16 +230,19 @@ def find_move_state(
     return None
 
 
-def update_move(
+# todo clean
+def _update_move(
         move: MoveState, name_target: str, capture_move: Optional[CaptureMove] = None
 ) -> None:
     """Update the existing move with a new target and capture move."""
     move.target_names.append(name_target)  # Add the target name
     if capture_move:
+        if move.capture_moves is None:
+            move.capture_moves = []
         move.capture_moves.append(capture_move)  # Add the capture move if it exists
 
 
-def create_move(
+def _create_move(
         name_src: str, name_target: str, valid_moves: List[MoveState],
         capture_move: Optional[CaptureMove] = None
 ) -> None:
@@ -230,17 +255,45 @@ def create_move(
     valid_moves.append(new_move)
 
 
+# todo
 def handle_mandatory_capture(
-        cells: list[tuple[Cell, Cell]]
+        cells: list[tuple[Cell, Cell]], cell_map: dict[str, Cell]
 ) -> list[tuple[Cell, Cell]]:
     """
     Capture moves are mandatory by the game rules.
     If there are normal moves and capture moves - the normal moves are not added to the list
     """
-    capture_moves = [(src, target) for src, target in cells if can_capture_piece(src, target)]
+    capture_moves = [
+        (src, target) for src, target in cells
+        if can_capture_piece(src, target) and _is_valid_capture(src, target, cell_map)
+    ]
 
-    # Return capture moves or all moves if no captures
-    return capture_moves if capture_moves else cells
+    filtered_cells = capture_moves if capture_moves else [
+        (src, target) for src, target in cells
+        if not can_capture_piece(src, target)
+    ]
+
+    return filtered_cells
+
+
+# todo
+#   add filter blocked from behind
+def _is_valid_capture(src, target, cell_map: dict[str, Cell]) -> bool:
+    try:
+        name = _filter_capture_move_out_of_bounds(src, target)
+        validate_capture_final_destination_is_available(cell_map.get(name).get_piece())
+        return True
+    except (CellNotFoundError, IllegalMoveError):
+        return False
+
+
+def _filter_capture_move_out_of_bounds(src: Cell, target: Cell) -> str | None:
+    """
+    Utility function for filtering capture moves that final destination cell is out of bounds.
+    """
+    final_cell_name = get_destination_cell_name_after_capture(src, target)
+    validate_capture_final_destination_is_in_bounds(final_cell_name)
+    return final_cell_name
 
 
 def enforce_mandatory_capture(

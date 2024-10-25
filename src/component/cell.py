@@ -1,7 +1,7 @@
 from typing import Optional
 
-from game import Player as P
-from piece import Piece
+from .game import Player as P
+from .piece import Piece
 
 
 class Cell:
@@ -14,6 +14,12 @@ class Cell:
         self.color = "black" if (row + column) % 2 == 0 else "white"
         self.playable = True if (row + column) % 2 == 0 else False
         self.piece = None
+
+    def __str__(self):
+        return f"Cell(name={self.name},  piece={self.piece})"
+
+    def __repr__(self):
+        return self.__str__()
 
     def set_piece(self, piece: Optional[Piece]) -> None:
         if self.playable:
@@ -47,7 +53,10 @@ class Cell:
         self.piece = None
 
     def is_king(self) -> bool:
-        return self.piece.is_king()
+        return self.piece is not None and self.piece.is_king()
 
     def set_king(self):
         self.piece.set_king()
+
+    def get_name(self) -> str:
+        return self.name

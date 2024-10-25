@@ -1,9 +1,9 @@
 import pytest
 import board
-import piece
+from component import piece
 
-from piece import Piece
-from cell import Cell
+from component.piece import Piece
+from component.cell import Cell
 
 
 @pytest.fixture
@@ -48,7 +48,6 @@ def setup_board(board_setup, pieces):
     :param board_setup: The current board setup object.
     :param pieces: List of tuples in the format (piece_owner, cell_name).
     """
-    print_cons(pieces)
     for piece_owner, cell_name in pieces:
         setup_piece_on_cell_by_name_and_owner(board_setup, piece_owner, cell_name)
 
@@ -60,7 +59,7 @@ def get_cell_by_name(
 
 
 def get_valid_moves_for_given_cell(board_setup, cell):
-    actual_moves = board_setup.cell_manager.get_valid_moves_for_given_cell(cell)
+    actual_moves = board_setup.cell_manager._get_valid_move_directions_for_cell(cell)
     return actual_moves
 
 

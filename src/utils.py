@@ -2,8 +2,8 @@ import logging
 import re
 from typing import List, Optional
 
-from cell import Cell
-from move_state import MoveState, CaptureMove
+from component.cell import Cell
+from state.move_state import MoveState, CaptureMove
 
 
 

@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List
 
-from cell import Cell
+from component.cell import Cell
 
 
 @dataclass
