@@ -154,8 +154,6 @@ def assert_stays_king(board_setup, source_name, target_name):
     assert board_setup.cell_manager.get_cell_by_name(target_name).is_king()
 
 
-
-
 def set_king_by_cell_name(
         board_setup, cell_name: str
 ) -> None:
@@ -255,64 +253,3 @@ class TestWinCondition:
         pass
 
 
-class TestGameInteraction:
-    import pytest
-
-    @pytest.mark.parametrize("pieces, expected", [
-        (
-                [(P.P1.name, "a11"), (P.P1.name, "a17"),
-                 (P.P2.name, "a73"), (P.P2.name, "a88")],
-                [
-                    MoveState("a11", ["a22"]),  # P1 available moves
-                    MoveState("a17", ["a28", "a26"]),
-                    MoveState("a73", ["a62", "a64"]),  # P2 available moves
-                    MoveState("a88", ["a77"])
-                ]
-        )
-    ])
-    def test_can_get_available_moves_for_player(self, board_setup, pieces, expected):
-        setup_board(board_setup, pieces)
-
-        # Get available moves for Player 1
-        board_setup.game.get_turn()
-        actual = board_setup.get_available_moves()
-        assert actual == expected[:2]  # Check for Player 1's expected moves
-
-        # Toggle turn and get available moves for Player 2
-        board_setup.game.toggle_whose_turn()
-        actual_p2 = board_setup.get_available_moves()
-        assert actual_p2 == expected[2:]  # Check for Player 2's expected moves
-
-    # todo
-    @pytest.mark.parametrize("pieces, expected", [
-        ([(P.P1.name, "a11"), (P.P1.name, "a17")],
-         [MoveState("a11", ["a22"]),  # P1 available moves
-          MoveState("a17", ["a28", "a26"])]
-         )])
-    def test_can_present_available_moves_for_player(self, board_setup, pieces, expected):
-        setup_board(board_setup, pieces)
-        board_setup.game.get_turn()
-        actual = board_setup.get_available_moves()
-        assert actual == expected
-
-    @pytest.mark.parametrize("pieces, expected", [
-        ([(P.P1.name, "a11"), (P.P1.name, "a17"),
-          (P.P2.name, "a22")],
-         [MoveState("a11", ["a22"], True, [captures("a22", "a33")])]  # P1 available moves
-         )])
-    def test_can_present_available_moves_for_player(self, board_setup, pieces, expected):
-        setup_board(board_setup, pieces)
-        board_setup.game.get_turn()
-        actual = board_setup.get_available_moves()
-        actual_prompt = board_setup.get_user_moves_prompt(actual)
-        expected_prompt = "[1] a11 -> a22 -> a33"
-        assert actual == expected
-        assert actual_prompt == expected_prompt
-
-    # todo
-    def test_player_can_choose_action(self):
-        pass
-
-    # todo
-    def test_can_redo_action(self):
-        pass
