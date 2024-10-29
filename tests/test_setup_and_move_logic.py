@@ -126,7 +126,7 @@ class TestCapture:
 
     @pytest.mark.parametrize("source ,src_owner ,target, tar_owner, expected_cell_after_capture",
                              [("a13", P.P1.name, "a22", P.P2.name, "a31"),
-                              # todo this is an end game conditon
+                              # Notice: this is an end game condition
                               # ("a11", P.P1.name, "a22", P.P2.name, "a33"),
                               ("a82", P.P2.name, "a73", P.P1.name, "a64"),
                               ("a84", P.P2.name, "a73", P.P1.name, "a62"),
@@ -159,18 +159,12 @@ class TestCapture:
             board_setup.move_piece(source, target)
 
     # todo
-    def test_chain_capture(self):
-        pass
-
-    # todo
-    def test_chain_capture_with_blocked_final_dest(self):
-        pass
-
-    # todo
     def test_must_eat_when_can_capture(self, board_setup):
         setup_piece_on_cell_by_name_and_owner(board_setup, P.P1.name, "a13")
         setup_piece_on_cell_by_name_and_owner(board_setup, P.P2.name, "a24")
         with pytest.raises(IllegalMoveError, match="Cannot make a normal move when capture is available"):
             board_setup.move_piece("a13", "a22")
 
+    def test_chain_capture_with_blocked_final_dest(self):
         pass
+    # todo

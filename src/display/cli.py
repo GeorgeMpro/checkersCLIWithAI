@@ -16,6 +16,9 @@ def extract_move_chosen_by_user(
    Returns:
    """
     selection, option = get_choice(moves_to_dict)
+    if selection == "q":
+        return selection, option
+
     chosen_move = moves_to_dict.get(selection)
     src_actual, tar_actual = extract_src_target_names(chosen_move)
     return src_actual, tar_actual
@@ -105,6 +108,7 @@ def _prompt_user_choice(options: dict):
     """
     formatted_options = [f"{key}: {value}" for key, value in options.items()]
     print(f"\nPlease choose a move from:\n{"\n".join(formatted_options)}")
+    print("press 'q' to quit")
 
 
 def moves_dto_to_dict(

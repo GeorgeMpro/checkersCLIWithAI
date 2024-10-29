@@ -1,10 +1,9 @@
 import logging
 import re
-from typing import List, Optional
+from typing import Optional
 
 from component.cell import Cell
 from state.move_state import MoveState, CaptureMove
-
 
 
 def get_logger(name: str):
@@ -61,9 +60,9 @@ def is_valid_cell_name(name: str) -> bool:
 
 
 def moves(
-        src_name: str, targets: List[str], is_capture: bool = False,
-        capture_moves: Optional[List[CaptureMove]] = None
-) -> List[MoveState]:
+        src_name: str, targets: list[str], is_capture: bool = False,
+        capture_moves: Optional[list[CaptureMove]] = None
+) -> list[MoveState]:
     """
     Create a list of MoveState objects for a given source and target(s).
 
@@ -92,7 +91,7 @@ def captures(name_target: str, name_final: str) -> CaptureMove:
     return CaptureMove(name_target, name_final)
 
 
-def get_potential_moves(row_target: int, col_src: int) -> List[tuple[int, int]]:
+def get_potential_moves(row_target: int, col_src: int) -> list[tuple[int, int]]:
     """
     Generate moves that can be done by the piece in the cell.
     :return: move indexes
@@ -105,8 +104,8 @@ def get_potential_moves(row_target: int, col_src: int) -> List[tuple[int, int]]:
 
 
 def generate_move(
-        name_src: str, target_name: List[str], is_capture_move: bool = False,
-        capture_moves: Optional[List[CaptureMove]] = None
+        name_src: str, target_name: list[str], is_capture_move: bool = False,
+        capture_moves: Optional[list[CaptureMove]] = None
 ) -> MoveState:
     return MoveState(
         src_name=name_src,

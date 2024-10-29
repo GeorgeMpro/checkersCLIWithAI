@@ -3,7 +3,8 @@ from typing import List
 from component.cell import Cell
 from exceptions.cell_not_found_error import CellNotFoundError
 from exceptions.illegal_move_error import IllegalMoveError
-from managers.move_manager import validate_move, get_destination_cell_name_after_capture, enforce_mandatory_capture, \
+from managers.move_handle_util import get_destination_cell_name_after_capture
+from managers.move_manager import validate_move, enforce_mandatory_capture, \
     validate_capture_final_destination_is_in_bounds, validate_capture_final_destination_is_available, \
     handle_mandatory_capture, manage_adding_moves_property_to_given_cells, validate_capture_move, generate_normal_moves, \
     generate_king_moves, filter_invalid_moves
@@ -44,9 +45,7 @@ class CellManager:
         """
         Get a cell by its a_ij name.
         """
-        # todo?
-        # deal with error logging
-        # try:
+        # todo: optional: handle logging error?
         self._validate_cell_name(name)
         return self.cell_map[name]
 
@@ -98,7 +97,6 @@ class CellManager:
         source_cell.remove_piece()
         target_cell.remove_piece()
 
-    # todo update to handle kings
     def _get_valid_move_directions_for_cell(self, cell: Cell) -> list[MoveState]:
 
         """
@@ -116,21 +114,23 @@ class CellManager:
 
         return self.handle_adding_valid_moves(cell.name, possible_moves)
 
-    # todo refactor
     def handle_adding_valid_moves(
             self, name_src: str, possible_moves: List[tuple[int, int]]
     ) -> list[MoveState]:
+        """
+        Filter and return valid moves.
+        """
+
         # the filtered cell list to be added
         cells = handle_mandatory_capture(
-            self.get_valid_cells(name_src, possible_moves),
+            self._get_valid_cells(name_src, possible_moves),
             self.get_cell_map()
         )
         filtered_moves = filter_invalid_moves(cells)
 
-        # todo wrong return type?
         return manage_adding_moves_property_to_given_cells(filtered_moves)
 
-    def get_valid_cells(
+    def _get_valid_cells(
             self, name_src: str, possible_moves: List[tuple[int, int]]
     ) -> list[tuple[Cell, Cell]]:
         """
@@ -145,7 +145,9 @@ class CellManager:
                     # cells.append(self.validate_cell_source_and_target_names(name_src, name_target))
                     cells.append(cell_pair)
             except(IllegalMoveError, CellNotFoundError) as e:
-                logger.error(f"Invalid move: {e}")
+                # todo
+                # Optional, suppressed logging
+                #  logger.error(f"Invalid move: {e}")
                 continue
         return cells
 
@@ -205,17 +207,20 @@ class CellManager:
         # After finding a valid capture, break the loop
         return move.is_capture()
 
+    # todo
+    #   check if chain, if chain remove all
+    #   maybe pass if chain from game > board > cell man?
     def generate_available_moves_for_player(
-            self, player: str
+            self, player: str, chained_name: str | None
     ) -> list[MoveState]:
         """
         Generate moves for the player whose turn is to play.
         """
-        cells = self._get_player_cells(player)
+        cells = self.get_player_cells(player)
 
-        return self._generate_player_move_states(cells)
+        return self._generate_player_move_states(cells, chained_name)
 
-    def _get_player_cells(self, player: str) -> list[Cell]:
+    def get_player_cells(self, player: str) -> list[Cell]:
         """
         Get all cells owned by the current player
         """
@@ -223,19 +228,33 @@ class CellManager:
             cell for cell in self.get_cell_map().values()
             if cell.get_piece_owner() == player
         ]
+
         return player_cells
 
     def _generate_player_move_states(
-            self, player_cells: List[Cell]
+            self, player_cells: List[Cell], chained_name: str | None
     ) -> List[MoveState]:
         """
         Generate move states for each of the player's pieces.
         """
+        # todo
+        #   check for chained moved and leave all else?
+        if chained_name:
+            return self.get_chained_cell_moves(chained_name)
 
         # First Pass:
         has_capture_moves = self._check_cells_for_capture_moves(player_cells)
 
+        # second pass
         return self._generate_filtered_moves(has_capture_moves, player_cells)
+
+    def get_chained_cell_moves(self, chained_name: str) -> list[MoveState]:
+        """
+        When executing chained capture only those piece moves are available.
+        """
+        return self._get_valid_move_directions_for_cell(
+            self.get_cell_by_name(chained_name)
+        )
 
     def _check_cells_for_capture_moves(
             self, cells: List[Cell]

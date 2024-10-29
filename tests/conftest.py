@@ -1,9 +1,16 @@
+import sys
+from io import StringIO
+
 import pytest
 import board
 from component import piece
+from component.game import P
 
 from component.piece import Piece
 from component.cell import Cell
+
+p1 = P.P1.name
+p2 = P.P2.name
 
 
 @pytest.fixture
@@ -15,6 +22,12 @@ def board_setup():
 def piece_setup(request):
     # Default to 'p1' if no parameter is provided
     return piece.Piece(request.param if hasattr(request, 'param') else 'p1')
+
+
+@pytest.fixture
+def suppress_stdout(monkeypatch):
+    """Fixture to suppress stdout messages from test."""
+    monkeypatch.setattr(sys, "stdout", StringIO())
 
 
 def put_piece_on_cell_and_return_cell(board_setup, cell_piece: Piece, row: int, column: int) -> Cell:
@@ -37,7 +50,7 @@ def setup_piece_on_cell_by_name_and_owner(board_setup, piece_owner: str, cell_na
 
 def assert_player_turn_after_move(board_setup, src: str, target: str, expected_turn: str):
     board_setup.move_piece(src, target)
-    actual_turn = board_setup.get_current_turn()
+    actual_turn = board_setup.get_current_player_turn()
     assert actual_turn == expected_turn
 
 
@@ -61,8 +74,3 @@ def get_cell_by_name(
 def get_valid_moves_for_given_cell(board_setup, cell):
     actual_moves = board_setup.cell_manager._get_valid_move_directions_for_cell(cell)
     return actual_moves
-
-
-# todo del
-def print_cons(board_setup):
-    print(f"\n{board_setup}")

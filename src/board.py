@@ -3,8 +3,10 @@ from component.game import Game, P
 from component.piece import Piece
 from display.board_display import BoardDisplay
 from managers.cell_manager import CellManager
-from managers.move_manager import get_destination_cell_name_after_capture, can_capture_piece, \
+from managers.move_handle_util import get_destination_cell_name_after_capture
+from managers.move_manager import \
     mange_chained_move, format_available_moves
+from managers.move_validator_util import can_capture_piece
 from managers.piece_manager import PieceManager
 from state.board_initial_configuration_dto import BoardInitialConfigurationDTO
 from state.board_state import BoardState
@@ -88,7 +90,7 @@ class Board:
         has_chain_capture = False
         # validate that the move does not violate chain rules
         mange_chained_move(
-            self.game.is_chained(), source_name, self.game.get_chaining_cell()
+            self.game.is_chained_move, source_name, self.game.chaining_cell_name
         )
 
         source_cell, target_cell = self.cell_manager.validate_cell_move_logic(source_name, target_name)
@@ -98,7 +100,7 @@ class Board:
         # update if turned to king
         self.check_king_promotion(final_name)
         # update chain capture
-        self.update_game_state(has_chain_capture)
+        self.update_game_state(has_chain_capture, final_name)
 
     def handle_move(
             self, has_chain_capture: bool, source_cell: Cell, target_cell: Cell
@@ -171,16 +173,21 @@ class Board:
         Update the game state if there is a piece that is in chain capture.
         """
         if has_chain_capture:
-            self.game.set_chaining_cell(final_dest_name)
+            self.game.chaining_cell_name = final_dest_name
         else:
-            self.game.remove_chaining_cell()
+            del self.game.chaining_cell_name
 
-    def update_game_state(self, has_chain_capture) -> None:
+    def update_game_state(self, has_chain_capture: bool, final_name: str) -> None:
         """
         Updates game state.
         """
-        self.game.set_chained_move(has_chain_capture)
-        self.game.toggle_whose_turn()
+        self.game.is_chained_move = has_chain_capture
+        if has_chain_capture:
+            self.game.chaining_cell_name = final_name
+        else:
+            del self.game.chaining_cell_name
+
+        self.game.toggle_player_turn()
 
     def capture_piece(self, source_cell: Cell, target_cell: Cell) -> str:
         cell_dest_name = get_destination_cell_name_after_capture(source_cell, target_cell)
@@ -189,17 +196,62 @@ class Board:
 
         return cell_dest_name
 
-    def get_current_turn(self) -> str:
-        return self.game.get_turn()
+    def get_current_player_turn(self) -> str:
+        return self.game.current_player.name
 
-    # todo
-    # combine for the game class
+    def get_available_moves(self, player: str = None) -> list[MoveState]:
+        if player is None:
+            player = self.game.current_player.name
 
-    def get_available_moves(self):
-        player = self.game.get_turn()
+        chained_name = self.game.chaining_cell_name
 
-        return self.cell_manager.generate_available_moves_for_player(player)
+        return self.cell_manager.generate_available_moves_for_player(player, chained_name)
 
     @staticmethod
     def get_user_moves_prompt(moves: list[MoveState]) -> str:
+        """
+        Return a prompt to be displayed to the user with available moves and how to access them.
+        """
         return format_available_moves(moves)
+
+    def is_game_end(
+            self, moves: list[MoveState], opponent_pieces: list[Piece]
+    ) -> bool:
+        """
+        Check whether the game has reached an end and who is the winner.
+        """
+        # handle no more moves
+        if not moves:
+            self._handle_game_end_no_more_moves()
+            return True
+
+        # handle no more opponent pieces
+        if not opponent_pieces:
+            self.game.winner = self.game.current_player
+            return True
+
+        return False
+
+    def _handle_game_end_no_more_moves(self):
+        """
+        When opponent has no more moves you win.
+        """
+        # set winner
+        turn = self.get_current_player_turn()
+        winner = P.P2 if turn == "p1" else P.P1
+        self.game.winner = winner
+        # set game has ended
+        self.set_game_over()
+
+    def is_game_over(self) -> bool:
+        """
+        Check if game reached its end.
+        """
+
+        return self.game.is_game_over
+
+    def set_game_over(self) -> None:
+        """
+        Update to game end.
+        """
+        self.game.is_game_over = True

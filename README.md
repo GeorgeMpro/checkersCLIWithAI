@@ -1,66 +1,47 @@
 # Checkers CLI with AI
 
+**Status:** Work in Progress 🚧
+
 ## Overview
 
-This project is a command-line-based implementation of the classic game of Checkers, currently being enhanced with AI
-features. The goal is to create an intelligent opponent that can play against the user, with multiple levels of
-complexity.
+This project is a command-line implementation of the classical Checkers game. supports two-player interaction
 
-### Current Status
+This project is being developed with a TDD-first approach and guided by SOLID principles to reinforce skills in clean,
+modular, and maintainable code.
 
-- **Game Logic**:
-    - Basic movement and capturing rules have been implemented.
-    - Working on finalizing king movement and capture logic.
-    - Adding game state tracking for turn management and win conditions.
+## Current State of the Game
 
-### AI Development Roadmap
+- **Interactive CLI**: Fully functional game in player vs. player mode.<br>
+  Players can view the board, receive prompts for available moves, and input commands to play the
+  game.
+- **Core Game Mechanics**: Implements classic Checkers rules, including capturing moves, chain captures, and king
+  promotions.
+- **Endgame Detection**: Automatically recognizes win conditions (no more moves, no more pieces).
 
-The current focus is on integrating AI capabilities into the checkers game. Below is the roadmap for AI implementation,
-from simpler approaches to more advanced strategies:
+## Future Improvements
 
-1. **A\* Search Algorithm**:
-    - Currently working towards implementing **A*** to help the AI evaluate the best moves based on a cost function.
-    - The cost function will prioritize capturing opponent pieces and kinging moves.
+- **AI Integration**: Implementing a Minimax-based AI opponent will be added, allowing players to compete against the
+  computer.
+- **AI Enhancement**: Implementing Minimax with Alpha-Beta pruning for a smarter opponent, and a faster gameplay experience.
+- **General**: Adding redo functionality.
 
-2. **Minimax Algorithm**:
-    - Planning to build a **Minimax-based AI** with **alpha-beta pruning** to enhance move evaluation efficiency.
-    - Alpha-beta pruning will reduce the number of board states evaluated, providing better performance while still
-      making intelligent decisions.
+## Installation and Usage
 
-3. **Considering: Monte Carlo Tree Search (MCTS)**:
-    - Evaluating the possibility of using **MCTS** for decision-making.
-    - MCTS will allow the AI to make decisions based on the results of multiple simulated games, providing an adaptive
-      and probabilistic approach.
+1. Clone this repository:
+   ```bash
+   git clone https://github.com/GeorgeMpro/checkersCLIWithAI
 
-4. **Considering: AlphaZero-Inspired AI**:
-    - Exploring a **simplified neural network** model inspired by **AlphaZero**.
-    - The network will eventually assist in evaluating board states and guiding the search for optimal moves, combining
-      MCTS with learned strategies.
+2. Navigate to the project folder and run the game:
+    ```bash
+   python3 main.py
 
-### Upcoming Features
+## Running Tests
 
-- **King Logic Implementation**:
-    - Finish implementation of king movement, including capturing both forward and backward.
+    python3 -m pytest
 
-- **Game State Tracking**:
-    - Implement a turn tracker, win condition detection, and a move counter.
+The tests cover:
 
-### Technology and Tools
-
-- **Language**: Python
-- **AI Algorithms in Progress**: A*, Minimax, MCTS, and potentially a neural network.
-- **Development Tools**: Pytest.
-
-### Notes
-
-- This project aims to integrate different AI techniques step by step, focusing first on classical approaches and then
-  moving towards machine learning-based solutions.
-- The AI implementations will be added iteratively, ensuring that each approach is thoroughly tested and functional
-  before moving to the next.
-
-## How to Run
-
-To run the game:
-
-```bash
-python main.py
+- Board and piece functionality (`test_board.py`)
+- Game state and win conditions (`test_game_state.py`)
+- Move generation and validations (`test_game_play.py`)
+- User prompt and input handling (`test_user_interaction.py`)

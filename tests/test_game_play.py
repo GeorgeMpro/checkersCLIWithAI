@@ -7,6 +7,11 @@ from component.game import Player as P
 from utils import moves, captures
 
 
+def assert_stays_king(board_setup, source_name, target_name):
+    board_setup.move_piece(source_name, target_name)
+    assert board_setup.cell_manager.get_cell_by_name(target_name).is_king()
+
+
 class TestMoveList:
 
     @pytest.mark.parametrize("cell_name,piece_owner,expected_moves",
@@ -56,8 +61,7 @@ class TestMoveList:
 
         assert actual_moves == expected_moves
 
-        # todo
-
+    # todo
     def test_cannot_move_to_normal_cell_if_has_capture(self, board_setup):
         setup_piece_on_cell_by_name_and_owner(board_setup, P.P1.name, "a13")
         setup_piece_on_cell_by_name_and_owner(board_setup, P.P2.name, "a24")
@@ -76,9 +80,6 @@ class TestMoveList:
         pass
 
     # todo
-    #   a two pass solution to make pieces that can capture
-
-    # todo
     def test_move_list_with_chained_capture(self):
         pass
 
@@ -86,11 +87,11 @@ class TestMoveList:
 class TestGamePlay:
 
     def test_has_player_turn(self, board_setup):
-        assert board_setup.get_current_turn() == P.P1.name
+        assert board_setup.get_current_player_turn() == P.P1.name
 
     def test_player_turn_updates_after_playing(self, board_setup):
         board_setup.initial_setup()
-        assert board_setup.get_current_turn() == P.P1.name
+        assert board_setup.get_current_player_turn() == P.P1.name
         assert_player_turn_after_move(board_setup, "a33", "a44", P.P2.name)
         assert_player_turn_after_move(board_setup, "a62", "a53", P.P1.name)
         assert_player_turn_after_move(board_setup, "a44", "a53", P.P2.name)
@@ -131,27 +132,6 @@ class TestGamePlay:
         with pytest.raises(IllegalMoveError, match=f"a33 is in chain capture. Cannot move other pieces when chained."):
             board_setup.move_piece("a17", "a28")
 
-    # todo when getting all available moves is complete
-    def test_when_chain_capture_has_only_the_chaining_cell_move_list(self, board_setup):
-        pass
-
-    # todo
-    def test_can_keep_track_of_turns(self):
-        pass
-
-    #   todo
-    #       stack for only undo
-    #       deque for undo and redo
-    #       https://docs.python.org/3/tutorial/datastructures.html#using-lists-as-stacks
-    def can_undo_turn(self):
-        pass
-
-
-# todo move
-def assert_stays_king(board_setup, source_name, target_name):
-    board_setup.move_piece(source_name, target_name)
-    assert board_setup.cell_manager.get_cell_by_name(target_name).is_king()
-
 
 def set_king_by_cell_name(
         board_setup, cell_name: str
@@ -185,7 +165,7 @@ class TestKing:
         # setup king and turn
         set_king_by_cell_name(board_setup, src)
         extract_player = board_setup.cell_manager.get_cell_by_name(src).get_piece_owner()
-        board_setup.game.set_player(extract_player)
+        board_setup.game.set_player_manually(extract_player)
 
         actual = board_setup.get_available_moves()
         expected = moves(src, targets)
@@ -232,23 +212,3 @@ class TestKing:
 
         board_setup.move_piece(src, dest)
         assert board_setup.cell_manager.get_cell_by_name(dest).is_king()
-
-
-class TestWinCondition:
-    # todo
-    def test_can_advance_game_turn(self):
-        pass
-
-    #     todo
-    def test_win_when_no_opponent_pieces(self):
-        pass
-
-    # todo
-    def test_win_when_no_moves_and_one_has_more_pieces(self):
-        pass
-
-    # todo
-    def test_draw_when_no_moves_and_same_pieces(self):
-        pass
-
-

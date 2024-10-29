@@ -41,4 +41,3 @@ class MoveState:
         Gets the capture moves for the current capture state.
         """
         return self.capture_moves
-
