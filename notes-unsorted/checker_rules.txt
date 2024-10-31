@@ -1,6 +1,6 @@
 
 # Board and Pieces:
-The game is played on an 8x8 board, with each player having 12 pieces. Only the dark squares are used, and players place their pieces in the first three rows on their respective sides.
+The game is played on a 8x8 board, with each player having 12 pieces. Only the dark squares are used, and players place their pieces in the first three rows on their respective sides.
 
 #Movement:
 A simple piece can move diagonally forward one square.

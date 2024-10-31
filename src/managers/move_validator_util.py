@@ -59,7 +59,7 @@ def _is_not_same_owner(source_cell: Cell, target_cell: Cell) -> None:
     source_owner = source_cell.get_piece_owner()
     target_owner = target_cell.get_piece_owner()
     if source_owner == target_owner:
-        raise IllegalMoveError("Cannot capture same owner")
+        raise IllegalMoveError(f"Cannot capture same owner:{source_owner}")
 
 
 def _is_valid_move_direction(source_cell: Cell, target_cell: Cell) -> None:

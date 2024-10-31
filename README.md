@@ -4,7 +4,7 @@
 
 ## Overview
 
-This project is a command-line implementation of the classical Checkers game. supports two-player interaction
+This project is a command-line implementation of the classical Checkers game. Supports two-player interaction.
 
 This project is being developed with a TDD-first approach and guided by SOLID principles to reinforce skills in clean,
 modular, and maintainable code.
@@ -20,10 +20,24 @@ modular, and maintainable code.
 
 ## Future Improvements
 
-- **AI Integration**: Implementing a Minimax-based AI opponent will be added, allowing players to compete against the
-  computer.
-- **AI Enhancement**: Implementing Minimax with Alpha-Beta pruning for a smarter opponent, and a faster gameplay experience.
-- **General**: Adding redo functionality.
+- **AI Integration**:
+    - **Minimax Integration**: A Minimax-based AI opponent for P vs. AI, and AI vs. AI gameplay.
+    - **Alpha Beta Pruning**:  Optimize Minimax for smarter, faster gameplay.
+    - **Opening Book and Iterative Deepening** (Optional): Add preset opening moves and iterative deepening for endgame strategy.
+
+- **Driver and Analysis**:
+    - **Driver Experimentation**: Run AI vs. AI simulations to test different heuristic performance.
+    - **Data Analysis**:
+        - Use Pandas to aggregate data and Matplotlib to visualize win rates, game lengths, and heuristic effectiveness.
+        - Summarize insights and refine configurations based on findings.
+
+- **Heuristic Optimization**:
+    - **Enhanced Heuristics**: Refine heuristics through driver simulations to identify optimal configurations.
+    - **Cell-Based Scoring** (Optional):  Integrate positional scoring (e.g. central control, protected cells) and adjust based on results.
+
+- **Game Enhancements** (Optional):
+    - **Redo Moves**: Add redo functionality for user experience and testing.
+    - **Player Configurations**: Allow users to customize AI settings (heuristic, lookahead depth, AI vs. AI).
 
 ## Installation and Usage
 

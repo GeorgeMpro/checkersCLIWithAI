@@ -75,8 +75,7 @@ class TestGameState:
         assert end_message in capsys.readouterr().out
 
         pass
-
-    # todo
+ # todo
     def test_can_keep_track_of_turns(self):
         pass
 

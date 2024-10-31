@@ -47,7 +47,7 @@ def assert_final_state(
 ) -> None:
     assert not src_cell.has_piece()
     assert tar_cell.has_piece()
-    assert tar_cell.get_name() == tar_expected
+    assert tar_cell.name == tar_expected
 
 
 def assert_initial(
@@ -55,7 +55,7 @@ def assert_initial(
 ) -> None:
     assert src_cell.has_piece()
     assert not tar_cell.has_piece()
-    assert src_cell.get_name() == src_expected
+    assert src_cell.name == src_expected
 
 
 class TestGameInteraction:

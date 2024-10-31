@@ -2,12 +2,12 @@ import sys
 from io import StringIO
 
 import pytest
+
 import board
 from component import piece
-from component.game import P
-
-from component.piece import Piece
 from component.cell import Cell
+from component.game import P
+from component.piece import Piece
 
 p1 = P.P1.name
 p2 = P.P2.name
@@ -54,7 +54,7 @@ def assert_player_turn_after_move(board_setup, src: str, target: str, expected_t
     assert actual_turn == expected_turn
 
 
-def setup_board(board_setup, pieces):
+def setup_board(board_setup, pieces: list[tuple[str, str]]):
     """
     Helper function to set up the board with pieces.
 
@@ -74,3 +74,12 @@ def get_cell_by_name(
 def get_valid_moves_for_given_cell(board_setup, cell):
     actual_moves = board_setup.cell_manager._get_valid_move_directions_for_cell(cell)
     return actual_moves
+
+# AI
+def setup_and_get_both_cells(
+        board_setup: board.Board, cells: list[tuple[str, str]]
+) -> tuple[list[Cell], list[Cell]]:
+    setup_board(board_setup, cells)
+    player_cells = board_setup.cell_manager.get_player_cells(p1)
+    opponent_cells = board_setup.cell_manager.get_player_cells(p2)
+    return player_cells, opponent_cells

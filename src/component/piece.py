@@ -1,9 +1,12 @@
+from attr import dataclass
+
+
+@dataclass
 class Piece:
-    def __init__(self, player: str):
-        self.in_game = True
-        self.player = player
-        self.playable = True
-        self.king = False
+    player: str
+    in_game: bool = True
+    playable = True
+    king = False
 
     def remove_from_game(self) -> None:
         self.in_game = False

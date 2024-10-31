@@ -1,0 +1,32 @@
+#General
+- separate tests
+    - core
+    - gameplay
+    - ai
+## CLI
+- add redo functionality
+- more responsive
+    allow user to ask about ai or choose to be player 2
+
+
+
+#AI
+
+## minimax
+- (??) research and summarize to the user ( pdf format/ user interaction)
+- Go over: opening book/ book moves
+    first steps for the AI to use instead of calculating each time
+    10-20(?) moves deep
+    handling variations in the moves
+
+    opening sequence list/dict(?)
+    10-20 moves per sequence
+
+    check when the opening moves are over and switch to minimax
+
+- (?) explain the use and calculations of minimax
+- (?) allow user to change difficulty - depth of search by the algorithm
+    notice: might slow down responsives
+
+## a,b pruning
+- (?) using a,b, pruning: explain the use and calculations

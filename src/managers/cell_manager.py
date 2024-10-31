@@ -1,3 +1,4 @@
+from copy import deepcopy
 from typing import List
 
 from component.cell import Cell
@@ -17,16 +18,28 @@ logger = get_logger(name='cell_manager')
 class CellManager:
 
     def __init__(self, rows, columns):
+        """
+        Initializes the board with specified rows and columns.
+
+        Cell map contains only playable cells to reduce memory usage.
+        """
         self.rows = rows
         self.columns = columns
         # The Cell names follow 8*8 matrix convention display a_ij, i,j=1,...,8
         #                  the +1 to start the values from 1 and not 0
         #                  [f"a{y + 1}{x + 1}" for x in range(rows)]
         self.board = [
-            [Cell(index_offset(y), index_offset(x)) for x in range(rows)]
+            [Cell(index_offset(y), index_offset(x))
+             for x in range(rows)]
             for y in range(columns)]
-        # generate a dictionary for O(1) access
-        self.cell_map = {cell.name: cell for row in self.board for cell in row}
+
+        # dictionary for O(1) access
+        self.cell_map = {
+            cell.name: cell
+            for row in self.board
+            for cell in row
+            if cell.playable
+        }
 
     def get_board(self):
         return self.board
@@ -40,6 +53,10 @@ class CellManager:
 
     def get_cell_map(self) -> dict[str, Cell]:
         return self.cell_map
+
+    # todo
+    def get_cell_map_copy(self) -> dict[str, Cell]:
+        return deepcopy(self.cell_map)
 
     def get_cell_by_name(self, name: str) -> Cell | None:
         """
@@ -56,9 +73,11 @@ class CellManager:
         """
         match = is_valid_cell_name(name)
         if (not match) or (name not in self.cell_map):
-            raise CellNotFoundError(f"Cell {name} not found")
+            raise CellNotFoundError(f"Cell {name} not found.")
 
-    def validate_cell_move_logic(self, source_name: str, target_name: str) -> tuple[Cell, Cell]:
+    def validate_cell_move_logic(
+            self, source_name: str, target_name: str
+    ) -> tuple[Cell, Cell]:
         source_cell = self.get_cell_by_name(source_name)
         target_cell = self.get_cell_by_name(target_name)
         validate_move(source_cell, target_cell)
@@ -83,6 +102,7 @@ class CellManager:
         # execute capture
         self.execute_capture(source_cell, target_cell, dest_cell)
 
+    # todo, move?
     @staticmethod
     def execute_capture(source_cell: Cell, target_cell: Cell, dest_cell: Cell
                         ) -> None:
@@ -142,7 +162,6 @@ class CellManager:
             try:
                 cell_pair = self.validate_cell_source_and_target_names(name_src, name_target)
                 if cell_pair[0] is not None and cell_pair[1]:
-                    # cells.append(self.validate_cell_source_and_target_names(name_src, name_target))
                     cells.append(cell_pair)
             except(IllegalMoveError, CellNotFoundError) as e:
                 # todo
@@ -183,11 +202,12 @@ class CellManager:
                 has_valid_chain_capture = self.validate_chain(move, target_cell)
 
                 break
+            # todo optional error message?
             except IllegalMoveError as e:
-                logger.error(f"Invalid move: {e}")
+                # logger.error(f"Invalid move: {e}")
                 continue
             except CellNotFoundError as e:
-                logger.error(f"Invalid move: {e}")
+                # logger.error(f"Invalid move: {e}")
                 continue
 
         return has_valid_chain_capture
@@ -220,12 +240,29 @@ class CellManager:
 
         return self._generate_player_move_states(cells, chained_name)
 
-    def get_player_cells(self, player: str) -> list[Cell]:
+    def get_player_cells(
+            self, player: str
+    ) -> list[Cell]:
         """
-        Get all cells owned by the current player
+        Get all cells owned by the given player
         """
         player_cells = [
             cell for cell in self.get_cell_map().values()
+            if cell.get_piece_owner() == player
+        ]
+
+        return player_cells
+
+    # todo consider moving to a utility class for heuristic explorer
+    @staticmethod
+    def get_player_cells_from_copy(
+            cell_map: dict[str, Cell], player: str
+    ) -> list[Cell]:
+        """
+        Get all cells owned by the given player.
+        """
+        player_cells = [
+            cell for cell in cell_map.values()
             if cell.get_piece_owner() == player
         ]
 

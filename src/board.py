@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from component.cell import Cell
 from component.game import Game, P
 from component.piece import Piece
@@ -14,34 +16,53 @@ from state.move_state import MoveState
 
 
 class Board:
-    _rows = _columns = 8
 
-    def __init__(self, rows=_rows, columns=_columns):
-        """"
-    Represents the game board for a checkers game.
-
-    Attributes:
-        columns (int): The number of columns on the board.
-
-
-                """
-        # todo delete
+    def __init__(self, rows=8, columns=8):
         self.rows = rows
         self.columns = columns
-        # self.board = [
-        #     [Cell(increment_index(y), increment_index(x)) for x in range(rows)]
-        #     for y in range(columns)]
-        # generate a dictionary for O(1) access
-        # self.cell_map = {cell.name: cell for row in self.board for cell in row}
-        self.cell_manager = CellManager(rows, columns)
+        self._cell_manager = CellManager(rows, columns)
         self.piece_manager = PieceManager()
-        self.game = Game()
+        self._game = Game()
+
+        # ai specific
+        self.is_ai = False
+        # Notice: copying in heuristic explorer causes pointing to same memory space.
+        self._ai_cell_manager = deepcopy(self._cell_manager)
+        self._ai_game = deepcopy(self._game)
 
     def __str__(self) -> str:
         """
         Generate a string representation of the current board state.
         """
         return BoardDisplay(self.get_board_state()).construct_printable_board()
+
+    # todo DOCO!
+    @property
+    def cell_manager(self) -> CellManager:
+        if self.is_ai:
+            return self._ai_cell_manager
+        return self._cell_manager
+
+    # todo DOCO!
+    @cell_manager.setter
+    def cell_manager(self, cell_manager: CellManager) -> None:
+        if self.is_ai:
+            self._ai_cell_manager = cell_manager
+        self._cell_manager = cell_manager
+
+    # todo
+    @property
+    def game(self) -> Game:
+        if self.is_ai:
+            return self._ai_game
+        return self._game
+
+    # todo
+    @game.setter
+    def game(self, game: Game):
+        if self.is_ai:
+            self._ai_game = game
+        self._game = game
 
     def get_board(self) -> list[list[Cell]]:
         return self.cell_manager.board
@@ -152,6 +173,8 @@ class Board:
         return target_cell.name
 
     # todo check errors?
+    # todo move to util class
+
     def check_king_promotion(self, target: str) -> None:
         """
         Promote a piece to king if it reaches the last row for its player.
@@ -255,3 +278,13 @@ class Board:
         Update to game end.
         """
         self.game.is_game_over = True
+
+    # todo
+    def set_ai_state_parameters(
+            self, game: Game, cell_map: dict[str, Cell]
+    ) -> None:
+        """
+        Directly update AI parameters in board.
+        """
+        self._ai_cell_manager.cell_map = cell_map
+        self._ai_game = game

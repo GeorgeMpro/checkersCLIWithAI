@@ -3,16 +3,22 @@ from conftest import board_setup, piece_setup, setup_piece_on_cell_by_name_and_o
 from exceptions.cell_not_found_error import CellNotFoundError
 from exceptions.illegal_move_error import IllegalMoveError
 from component.game import Player as P
-from test_game_play import get_cell_by_name
+from gameplay.test_game_play import get_cell_by_name
 
 
 class TestBoardSetup:
-    cell_names = [f"a{i}{j}" for i in range(1, 9) for j in range(1, 9)]
+    playable_cells = [
+        f"a{i}{j}"
+        for i in range(1, 9)
+        for j in range(1, 9)
+        if i + j % 2 == 0
+    ]
+
     p1_init = [(f"a{i}{j}", P.P1.name) for i in range(1, 4) for j in range(1, 9) if (i + j) % 2 == 0]
     p2_init = [(f"a{i}{j}", P.P2.name) for i in range((9 - 3), 9) for j in range(1, 9) if (i + j) % 2 == 0]
     init_cells = p1_init + p2_init
 
-    @pytest.mark.parametrize("cell_name", cell_names)
+    @pytest.mark.parametrize("cell_name", playable_cells)
     def test_can_get_cell_by_name(self, board_setup, cell_name):
         cell = get_cell_by_name(board_setup, cell_name)
         assert cell.name == cell_name

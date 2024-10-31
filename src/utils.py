@@ -35,9 +35,9 @@ def index_offset(index: int) -> int:
     return tmp
 
 
-def get_cell_row_from_name(source_cell: Cell) -> Optional[Cell]:
-    source_row = source_cell.name[1:]
-    return source_row
+# todo ?
+def get_cell_row_from_name(source_cell: Cell) -> str:
+    return source_cell.name[1:]
 
 
 def extract_index_from_cell(source_cell: Cell) -> tuple[int, int]:

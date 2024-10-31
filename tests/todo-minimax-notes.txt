@@ -1,0 +1,87 @@
+# Road Map
+    * heuristic function
+        - values by educated guesses
+            piece specific and end game ( win, lose)
+            eval forced moves ( capture, chain capture)
+            capture, being captured, chains
+        - plug heuristic into the eval function to allow variety
+        driver( once its implemented):
+            experiment with different heuristics and choose the best ones
+            add more factors like cell location and value
+
+    * running evaluations on all possible moves
+        (probably use a heap for faster access)
+
+    * implementing minimax on the data structure
+        eval all moves, store the best
+        ? opening book
+            no need to evaluate each time just run the ds and choose the best option
+            ? make variations with close values for play variety?
+        ? iterative deepening search for final states ( close to victory/ few cells)
+
+    * a,b pruning to increase speed
+
+    * driver and ai vs ai
+        - "duel" between heuristics
+           experiment with different heuristics
+        - simulate games between them
+            ( always full game?)
+        - storing relevant game data
+        - analyze relevant game data
+        - optional: allow start mid-game/ after opening book/ with specific board configurations
+
+    * data analysis
+        - store and visualize data from the driver's experiments
+        - add a "data analysis" section:
+                how tested the heuristics
+                key insights ( best performing configurations, optimal weights)
+                why certain choices were made according to the analysis
+
+    * optional:
+        - add player configs: choose heuristic, look ahead depth, see an ai vs ai game
+        - player can specify using args and the game loop
+        - make the game available online as CLI
+        - team up and implement ui and make available online
+# General ideas
+- opening book
+    - use transposition table (hashing) to generate an opening book
+    - even with highest scored moves, keep some sorty of variety
+- driver
+    - simulate ai vs ai games with different heuristics
+    - gather data and analyze ( pandas and matplotlib)
+    - modify heuristic according to the results
+- iterative deepening search
+
+
+# Structure
+- heuristic
+    - take a state and return an evaluation. giving immediate, non-cumulative value.
+    - but i need to think about accumulating score
+    -driver
+        - get a basic heuristic and compare ranges
+        e.g. 10 normal 20 king, then 15 or 8 to normal and 30-15 to king
+        - add weights to cells according to different factors
+            - guarding end of board ( opponent becoming king)
+            - protected
+            - controlling center
+- hash manager
+- driver
+    - keep in a data/ section
+    - store the driver results
+        csv, json -  see demands
+- interpreter for driver results
+    - pandas
+    - matplotlib
+
+
+
+
+
+
+- **Heuristic Optimization**:
+    - **Enhanced Heuristics**: Refine heuristics through driver simulations to identify optimal configurations.
+    - **Cell-Based Scoring** (Optional): Integrate positional scoring (e.g., central control, protected cells) and adjust based on results.
+
+- **Gameplay Features** (Optional):
+    - **Redo Moves**: Add redo functionality for user experience and testing.
+    - **AI Configurations**: Allow users to customize AI settings (heuristic, lookahead depth, AI vs. AI).

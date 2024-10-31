@@ -6,4 +6,4 @@ from component.cell import Cell
 
 @dataclass
 class BoardState:
-    cells: List[List['Cell']]
+    cells: List[List[Cell]]

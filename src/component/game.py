@@ -1,3 +1,5 @@
+from dataclasses import dataclass, field
+from email.policy import default
 from enum import Enum
 from typing import Optional
 
@@ -23,13 +25,14 @@ class Player(Enum):
 P = Player
 
 
+@dataclass
 class Game:
-    def __init__(self):
-        self._chaining_cell_name: Optional[str] = None
-        self._current_player = P.P1
-        self._is_chained_move = False
-        self._is_game_over = False
-        self._winner: Optional[P] = None
+    _chaining_cell_name: Optional[str] = None
+    _current_player: P = field(default=P.P1)
+    turn_counter: int = field(default=0)
+    _is_chained_move: bool = field(default=False)
+    _is_game_over: bool = field(default=False)
+    _winner: Optional[P] = None
 
     @property
     def chaining_cell_name(self):
@@ -78,6 +81,7 @@ class Game:
     def toggle_player_turn(self) -> None:
         if not self.is_chained_move:
             self.current_player = P.P2 if self.current_player == P.P1 else P.P1
+            self.turn_counter += 1
 
     # todo move to player?
     def set_player_manually(self, player: P) -> None:

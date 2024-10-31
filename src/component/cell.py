@@ -1,27 +1,36 @@
+from dataclasses import dataclass, field
 from typing import Optional
 
 from .game import Player as P
 from .piece import Piece
 
 
+@dataclass
 class Cell:
+    _name: str = field(init=False)
+    row: int
+    column: int
+    color: str = field(init=False)
+    playable: bool = field(init=False)
+    piece: Optional[Piece] = None
+    king: bool = False
 
-    def __init__(self, row, column):
+    def __post_init__(self):
+        self.color = "black" if (is_black := (self.row + self.column) % 2 == 0) else "white"
+        self.playable = is_black
+        self._name = f"a{self.row}{self.column}"
 
-        self.name = f"a{row}{column}"
-        self.king = False
-        # playable cells are black
-        self.color = "black" if (row + column) % 2 == 0 else "white"
-        self.playable = True if (row + column) % 2 == 0 else False
-        self.piece = None
+    @property
+    def name(self) -> str:
+        return self._name
 
     def __str__(self):
         return f"Cell(name={self.name},  piece={self.piece})"
 
-    def __repr__(self):
-        return self.__str__()
-
-    def set_piece(self, piece: Optional[Piece]) -> None:
+    def set_piece(
+            self, piece: Optional[Piece]
+    ) -> None:
+        """Place a piece in the cell if playable."""
         if self.playable:
             self.piece = piece
 
@@ -38,6 +47,7 @@ class Cell:
     def get_piece(self) -> Piece:
         return self.piece
 
+    # todo walrus?
     def get_piece_owner(self) -> str | None:
         if not self.has_piece():
             return None
@@ -57,6 +67,3 @@ class Cell:
 
     def set_king(self):
         self.piece.set_king()
-
-    def get_name(self) -> str:
-        return self.name
