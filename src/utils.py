@@ -3,6 +3,7 @@ import re
 from typing import Optional
 
 from component.cell import Cell
+from component.game import Game, P
 from state.move_state import MoveState, CaptureMove
 
 
@@ -113,3 +114,11 @@ def generate_move(
         is_capture_move=is_capture_move,
         capture_moves=capture_moves
     )
+
+
+def get_current_player_and_opponent_names(
+        game_copy: Game
+) -> tuple[str, str]:
+    player = game_copy.current_player.name
+    opponent = P.P2.name if player else P.P1.name
+    return player, opponent

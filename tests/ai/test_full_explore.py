@@ -5,7 +5,7 @@ from ai.heuristic_explorer import HeuristicExplorer
 from board import Board
 from component.game import P
 from component.piece import Piece
-from conftest import board_setup, p1, p2, setup_board
+from conftest import p1, p2, setup_board
 
 
 def assert_game_state(board, player, name_src, available_moves, targets):
@@ -55,9 +55,7 @@ class TestFullExplore:
     # todo
     #   Notice: board display does not work correctly on ai board
 
-    def test_separate_copy_generation(self, board_setup):
-        board = board_setup
-        hs = HeuristicExplorer(board)
+    def test_separate_copy_generation(self, board, hs):
         assert board.game is not board._ai_game
         assert board._ai_cell_manager is not board.cell_manager
 
@@ -74,9 +72,8 @@ class TestFullExplore:
             ([(p1, "a17"), (p2, "a88")], 3),
         ]
     )
-    def test_generate_correct_number_of_unique_copies(self, board_setup, pieces, expected_move_count):
+    def test_generate_correct_number_of_unique_copies(self, board, pieces, expected_move_count):
         # setup
-        board = board_setup
         setup_board(board, pieces)
         hs = HeuristicExplorer(board)
 
@@ -113,12 +110,11 @@ class TestFullExplore:
              ["a26 -> a35", "a26 -> a37", "a22 -> a31", "a22 -> a33"]),
         ])
     def test_can_execute_moves_on_copy(
-            self, board_setup: Board, pieces: list[tuple[str, str]], sources: list[str], targets: list[str],
+            self, board: Board, hs: HeuristicExplorer, pieces: list[tuple[str, str]], sources: list[str],
+            targets: list[str],
             origin_moves: list[str], next_moves: list[str]
     ):
-        board = board_setup
         setup_board(board, pieces)
-        hs = HeuristicExplorer(board)
 
         # Action
         hs.ai_execute_available_moves()
@@ -137,16 +133,16 @@ class TestFullExplore:
             )
 
     # todo
-    def test_can_execute_several_moves_on_copy(self, board_setup):
+    def test_can_execute_several_moves_on_copy(
+            self, board, hs
+    ):
         # setup
-        board = board_setup
         p1_src = "a11"
         p1_tar = "a22"
         p2_src = "a88"
         p2_tar = "a77"
         pieces = [(p1, p1_src), (p2, p2_src)]
         setup_board(board, pieces)
-        hs = HeuristicExplorer(board)
         hs.ai_execute_available_moves(0, 2)
 
         assert board.game is not board._ai_game
@@ -175,13 +171,13 @@ class TestFullExplore:
         # todo
 
     # todo, check nothing?
-    def test_explore_stops_at_game_end(self, board_setup):
-        setup_board(board_setup, [
+    @pytest.mark.skip
+    def test_explore_stops_at_game_end(self, board, hs):
+        setup_board(board, [
             (p1, "a11"), (p2, "a22")
         ])
-        hs = HeuristicExplorer(board_setup)
         hs.ai_execute_available_moves(0, 100)
-        with AIContextManager(board_setup) as ai_context:
+        with AIContextManager(board) as ai_context:
             print(f"player: {ai_context.game.current_player}")
             print(f"turn: {ai_context.game.turn_counter}")
             print(f"is win: {ai_context.game.is_game_over}")

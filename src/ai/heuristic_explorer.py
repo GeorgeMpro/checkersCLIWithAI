@@ -6,16 +6,17 @@ from board import Board
 from component.cell import Cell
 from component.game import Game
 from state.move_state import MoveState
+from utils import get_current_player_and_opponent_names
 
 
 class HeuristicExplorer:
     def __init__(self, board: Board):
         self.board = board
-        self.node_gen = NodeGenerator()
         # todo
         with AIContextManager(board) as ai_context:
             self.ai_cell_manager = ai_context.cell_manager
             self.ai_game = ai_context.game
+        self.node_gen = NodeGenerator()
 
     def ai_execute_available_moves(
             self, depth_counter: int = 0, max_depth: int = 0, copy_game=None, copy_map=None
@@ -161,7 +162,22 @@ class HeuristicExplorer:
 
         return copies
 
-    def generate_root_node(self) -> Node:
-        map_copy, game_copy = self._get_cell_map_and_game_copies()
+    def generate_root_node(self, game: Game) -> Node:
 
-        return self.node_gen.generate_root_node(map_copy, game_copy)
+        pairs = self._generate_move_pairs(
+            self._get_available_player_moves()
+        )
+        player, opponent = get_current_player_and_opponent_names(game)
+        return self.node_gen.generate_root_node(
+            (player, opponent), pairs, self._get_all_game_cells(
+                player, opponent
+            )
+        )
+
+    def _get_all_game_cells(
+            self, player: str, opponent: str
+    ) -> tuple[list[Cell], list[Cell]]:
+        player_cells = self.ai_cell_manager.get_player_cells(player)
+        opponent_cells = self.ai_cell_manager.get_player_cells(opponent)
+
+        return player_cells, opponent_cells

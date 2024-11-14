@@ -1,64 +1,86 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+from typing import Optional
 
 from ai.educated_guess_heuristic import eval_player_state
+from ai.node import Node
 from component.cell import Cell
-from component.game import Game
-from state.move_state import MoveState
 
 
-@dataclass
-class Node:
+# comparison based on the first field
+@dataclass(order=True)
+class Path:
+    depth: int
+    move: tuple[str, str]
     score: int
-    player: str
-    moves: list = field(default_factory=list)
+    current_player: str
+    moves: list[tuple[str, str]]
 
 
+# todo ? change to util class?
 class NodeGenerator:
-    def generate_root_node(self, map_cp, game_cp) -> Node:
-        self.set_ai_cell_map(map_cp)
+    def __init__(self):
+        self._root_node: Optional[Node] = None
 
-        return self._initialize_node(game_cp)
+    @property
+    def root_node(self) -> Node:
+        return self._root_node
 
-    # todo
-    #   maybe pass cell_map each time?
-    def _initialize_node(self, game_copy: Game) -> Node:
-        player, opponent = self._get_player_and_opponent_names(game_copy)
-        player_cells, opponent_cells = self._get_all_game_cells(player, opponent)
-        moves = self._get_moves(player, game_copy)
-        score = self._get_score(opponent_cells, player_cells)
+    @root_node.setter
+    def root_node(self, root_node: Node):
+        self._root_node = root_node
 
-        return Node(score, player, moves)
+    @root_node.deleter
+    def root_node(self):
+        self._root_node = None
 
-    @staticmethod
-    def _get_score(
-            opponent_cells: list[Cell], player_cells: list[Cell]
-    ) -> int:
-        return eval_player_state(
-            player_cells, opponent_cells
+    def generate_root_node(
+            self, current_players: tuple[str, str], move_pairs, all_cells: tuple[list[Cell], list[Cell]]
+    ) -> Node:
+        return self._initialize_node(
+            current_players,
+            move_pairs,
+            all_cells
         )
 
-    def _get_moves(
-            self, player: str, game_copy: Game
-    ) -> list[MoveState]:
-        return self.ai_cell_manager.generate_available_moves_for_player(
-            player, game_copy.chaining_cell_name
-        )
-
-    def set_ai_cell_map(self, cell_map_copy: dict[str, Cell]) -> None:
-        self.ai_cell_manager.cell_map = cell_map_copy
-
+    # todo move?
     @staticmethod
-    def _get_player_and_opponent_names(
-            game_copy: Game
-    ) -> tuple[str, str]:
-        player = game_copy.current_player.name
-        opponent = P.P2.name if player else P.P1.name
-        return player, opponent
+    def _initialize_node(
+            current_players: tuple[str, str], move_pairs: list[tuple[str, str]],
+            all_cells: tuple[list[Cell], list[Cell]]
+    ) -> Node:
+        """
+        Generate a node from given values.
 
-    def _get_all_game_cells(
-            self, player: str, opponent: str
-    ) -> tuple[list[Cell], list[Cell]]:
-        player_cells = self.ai_cell_manager.get_player_cells(player)
-        opponent_cells = self.ai_cell_manager.get_player_cells(opponent)
+        Notice: assumes provided correct values.
+        """
+        player, opponent = current_players
+        player_cells, opponent_cells = all_cells
+        score = eval_player_state(player_cells, opponent_cells)
 
-        return player_cells, opponent_cells
+        return Node(score, player, move_pairs)
+
+    def dfs_path(self, node: Node = None, is_root: bool = True):
+
+        # todo error handling when zip error?
+        path = []
+        if is_root:
+            root = self.root_node
+            node = root
+            path.append(
+                Path(root.depth, None, root.score, root.player, root.moves)
+            )
+
+        # Validate moves and children
+        # todo del? handle error?
+        if len(node.moves) != len(node.children):
+            # todo
+            print(f"\n{node.moves=} {node.children=}")
+            raise ValueError(f"Mismatch: moves={len(node.moves)} and children={len(node.children)}")
+
+        for move, child in zip(node.moves, node.children.values(), strict=True):
+            path.append(
+                Path(child.depth, move, child.score, child.player, child.moves)
+            )
+            path.extend(self.dfs_path(child, is_root=False))
+
+        return path
