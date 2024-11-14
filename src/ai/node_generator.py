@@ -1,5 +1,10 @@
 from dataclasses import dataclass, field
 
+from ai.educated_guess_heuristic import eval_player_state
+from component.cell import Cell
+from component.game import Game
+from state.move_state import MoveState
+
 
 @dataclass
 class Node:
@@ -7,13 +12,12 @@ class Node:
     player: str
     moves: list = field(default_factory=list)
 
+
 class NodeGenerator:
+    def generate_root_node(self, map_cp, game_cp) -> Node:
+        self.set_ai_cell_map(map_cp)
 
-    def generate_root_node(self) -> Node:
-        map_copy, game_copy = self._get_cell_map_and_game_copies()
-        self.set_ai_cell_map(map_copy)
-
-        return self._initialize_node(game_copy)
+        return self._initialize_node(game_cp)
 
     # todo
     #   maybe pass cell_map each time?

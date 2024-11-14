@@ -1,7 +1,7 @@
 from copy import deepcopy
 
 from ai.ai_context_manager import AIContextManager
-from ai.node_generator import NodeGenerator
+from ai.node_generator import NodeGenerator, Node
 from board import Board
 from component.cell import Cell
 from component.game import Game
@@ -117,7 +117,7 @@ class HeuristicExplorer:
         """
         Pass state directly to the board for update.
         """
-        # todo can't seem to find a way to implicitly assing them through HS fields or other methods.
+        # todo can't seem to find a way to implicitly passing them through HS fields or other methods.
         # Notice: avoids mixing the reference to game and AI game
         self.board.set_ai_state_parameters(game, cell_map)
 
@@ -161,9 +161,7 @@ class HeuristicExplorer:
 
         return copies
 
-
     def generate_root_node(self) -> Node:
         map_copy, game_copy = self._get_cell_map_and_game_copies()
-        self.set_ai_cell_map(map_copy)
 
-        return self._initialize_node(game_copy)
+        return self.node_gen.generate_root_node(map_copy, game_copy)
