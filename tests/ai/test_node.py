@@ -5,6 +5,18 @@ from conftest import setup_board, p1, p2
 from utils import moves
 
 
+def assert_sorted_path_list(
+        sorted_actual_path: list[Path], sorted_expected_path: list[Path]
+) -> None:
+    # Assert path elements individually
+    for actual, expected in zip(sorted_actual_path, sorted_expected_path):
+        assert actual.depth == expected.depth
+        assert actual.move == expected.move
+        assert actual.score == expected.score
+        assert actual.current_player == expected.current_player
+        assert actual.moves == expected.moves
+
+
 class TestNode:
     # TODO node
     #   store score, moves, and moves point to next nodes
@@ -68,7 +80,7 @@ class TestNode:
         child_3.add_child(move_3[2], child_3_1)
 
         print(f"\nROOT:\n{ng.root_node.moves=}\n{ng.root_node.children=}")
-        path = ng.dfs_path()
+        path = ng.generate_path_by_dfs()
 
         created = [
             Path(depth=0, move=None, score=20, current_player='p1',
@@ -87,13 +99,7 @@ class TestNode:
         for p in sorted_actual_path:
             print(f"\n{p}")
 
-        # Assert path elements individually
-        for actual, expected in zip(sorted_actual_path, sorted_expected_path):
-            assert actual.depth == expected.depth
-            assert actual.move == expected.move
-            assert actual.score == expected.score
-            assert actual.current_player == expected.current_player
-            assert actual.moves == expected.moves
+        assert_sorted_path_list(sorted_actual_path, sorted_expected_path)
 
         # Ensure correct relationships
         assert root_node.children[("a11", "a22")].score == 10
